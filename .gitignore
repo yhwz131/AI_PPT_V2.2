@@ -1,0 +1,75 @@
+# 环境变量与密钥
+.env
+.env.local
+*.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PaddleOCR 大文件
+paddleocr/models/
+paddleocr/output/
+paddleocr/logs/
+paddleocr/.api_*.pid
+paddleocr/nohup.out
+
+# Wav2Lip 大文件
+Wav2Lip/
+wav2lip_workspce/Wav2Lip/models/*.pt
+
+# IndexTTS-vLLM 大文件
+index-tts-vllm/checkpoints/
+index-tts-vllm/outputs/
+index-tts-vllm/logs/
+
+# Digital Human Interface 产出
+digital_human_interface/static/video/hls/
+digital_human_interface/static/video/uploads/
+digital_human_interface/static/video/converted/
+digital_human_interface/static/video/temp/
+digital_human_interface/static/video/mergers/
+digital_human_interface/static/audio/
+digital_human_interface/static/file/uploads/
+digital_human_interface/static/file/pdf/
+digital_human_interface/static/file/images/
+digital_human_interface/logs/
+
+# Frontend (compiled assets change per build)
+frontend/
+
+# Node.js
+node_modules/
+*.tsbuildinfo
+
+# 运行时产出
+logs/
+.pids/
+*.log
+nohup.out
+
+# 视频产出（大文件）
+digital_human_interface/static/video/mergers/
+
+# 旧前端（大静态资源）
+frontend-old/static/*.mp4
+
+# Cursor 内部
+.cursor/
+*.avi
+*/temp/
+image_output/
+uploaded_files/

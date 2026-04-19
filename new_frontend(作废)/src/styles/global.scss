@@ -1,0 +1,102 @@
+$bg-main: #0f172a;
+$bg-card: #1e293b;
+$bg-border: #334155;
+
+$text-primary: #e2e8f0;
+$text-secondary: #94a3b8;
+
+$accent-blue: #3b82f6;
+$accent-success: #10b981;
+$accent-error: #ef4444;
+$accent-warning: #f59e0b;
+
+:root {
+  --bg-main: #{$bg-main};
+  --bg-card: #{$bg-card};
+  --bg-border: #{$bg-border};
+
+  --text-primary: #{$text-primary};
+  --text-secondary: #{$text-secondary};
+
+  --accent-blue: #{$accent-blue};
+  --accent-success: #{$accent-success};
+  --accent-error: #{$accent-error};
+  --accent-warning: #{$accent-warning};
+
+  --bg-primary: #{$bg-main};
+  --bg-secondary: #{$bg-card};
+  --border-color: #{$bg-border};
+  --accent-primary: #{$accent-blue};
+
+  --el-color-primary: #{$accent-blue};
+  --el-color-primary-light-3: #6aa1f7;
+  --el-color-primary-light-5: #9dc1fa;
+  --el-color-primary-light-7: #c6dffb;
+  --el-color-primary-light-9: #eaf2fe;
+  --el-color-primary-dark-2: #2e7de0;
+  --el-color-success: #{$accent-success};
+  --el-color-warning: #{$accent-warning};
+  --el-color-danger: #{$accent-error};
+  --el-color-error: #{$accent-error};
+  --el-color-info: #909399;
+
+  --el-bg-color: #{$bg-main};
+  --el-bg-color-page: #{$bg-main};
+  --el-bg-color-overlay: #{$bg-card};
+
+  --el-text-color-primary: #{$text-primary};
+  --el-text-color-regular: #c9d1d9;
+  --el-text-color-secondary: #{$text-secondary};
+  --el-text-color-placeholder: #6b7280;
+  --el-text-color-disabled: #4b5563;
+
+  --el-border-color: #{$bg-border};
+  --el-border-color-light: #3d4f65;
+  --el-border-color-lighter: #475569;
+  --el-border-color-extra-light: #4b5563;
+  --el-border-color-dark: #{$bg-border};
+
+  --el-fill-color: #{$bg-card};
+  --el-fill-color-light: #263548;
+  --el-fill-color-lighter: #2d3f54;
+  --el-fill-color-extra-light: #334155;
+  --el-fill-color-dark: #1a2736;
+  --el-fill-color-darker: #141f2d;
+  --el-fill-color-blank: #{$bg-card};
+
+  --el-mask-color: rgba(0, 0, 0, 0.6);
+
+  --el-card-bg-color: #{$bg-card};
+  --el-dialog-bg-color: #{$bg-card};
+  --el-menu-bg-color: #{$bg-card};
+  --el-menu-hover-bg-color: #263548;
+  --el-menu-active-color: #{$accent-blue};
+
+  --el-input-bg-color: #{$bg-main};
+  --el-input-border-color: #{$bg-border};
+  --el-input-text-color: #{$text-primary};
+  --el-input-placeholder-color: #6b7280;
+
+  --el-disabled-bg-color: #1a2736;
+  --el-disabled-text-color: #4b5563;
+  --el-disabled-border-color: #2d3f54;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  background-color: $bg-main;
+  color: $text-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: $accent-blue;
+  text-decoration: none;
+}

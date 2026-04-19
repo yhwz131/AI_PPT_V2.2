@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 登录遮罩 -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-shield-alt"></i>
+                <h2>管理控制台</h2>
+                <p>请输入管理员凭证</p>
+            </div>
+            <div class="login-body">
+                <div class="login-field">
+                    <label><i class="fas fa-user"></i> 用户名</label>
+                    <input type="text" id="loginUsername" placeholder="用户名" autocomplete="off">
+                </div>
+                <div class="login-field">
+                    <label><i class="fas fa-lock"></i> 密码</label>
+                    <input type="password" id="loginPassword" placeholder="密码" autocomplete="off">
+                </div>
+                <div class="login-error" id="loginError" style="display:none;"></div>
+                <button class="btn btn-primary login-btn" id="loginBtn" onclick="doLogin()">
+                    <i class="fas fa-sign-in-alt"></i> 登 录
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-shell" id="mainContainer" style="display:none;">
+        <!-- 顶部栏 -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <h1><i class="fas fa-terminal"></i> {{ title }}</h1>
+            </div>
+            <div class="top-bar-right">
+                <div class="status-indicator" id="connectionStatus">
+                    <i class="fas fa-circle"></i><span>连接中...</span>
+                </div>
+                <div class="current-time" id="currentTime">{{ current_time }}</div>
+                <button class="btn btn-sm btn-ghost" onclick="doLogout()">
+                    <i class="fas fa-sign-out-alt"></i> 退出
+                </button>
+            </div>
+        </header>
+
+        <!-- Tab 导航 -->
+        <nav class="tab-nav" id="tabNav">
+            <button class="tab-btn active" data-tab="dashboard"><i class="fas fa-tachometer-alt"></i> 仪表盘</button>
+            <button class="tab-btn" data-tab="console"><i class="fas fa-terminal"></i> 实时控制台</button>
+            <button class="tab-btn" data-tab="logfiles"><i class="fas fa-file-alt"></i> 日志文件</button>
+            <button class="tab-btn" data-tab="videos"><i class="fas fa-film"></i> 视频管理</button>
+            <button class="tab-btn" data-tab="controls"><i class="fas fa-sliders-h"></i> 系统控制</button>
+        </nav>
+
+        <!-- Tab 内容区 -->
+        <div class="tab-content">
+
+            <!-- ==================== Tab 1: 仪表盘 ==================== -->
+            <section class="tab-pane active" id="tab-dashboard">
+                <div class="dash-grid">
+                    <!-- CPU -->
+                    <div class="dash-card">
+                        <div class="dash-card-header"><i class="fas fa-microchip"></i> CPU</div>
+                        <div class="dash-card-body" id="cpuCard">
+                            <div class="metric-value"><span id="cpuPercent">--</span>%</div>
+                            <div class="progress-bar"><div class="progress-fill cpu" id="cpuBar" style="width:0%"></div></div>
+                            <div class="metric-sub" id="cpuCores">-- 核心</div>
+                        </div>
+                    </div>
+                    <!-- Memory -->
+                    <div class="dash-card">
+                        <div class="dash-card-header"><i class="fas fa-memory"></i> 内存</div>
+                        <div class="dash-card-body" id="memCard">
+                            <div class="metric-value"><span id="memPercent">--</span>%</div>
+                            <div class="progress-bar"><div class="progress-fill memory" id="memBar" style="width:0%"></div></div>
+                            <div class="metric-sub" id="memDetail">-- / --</div>
+                        </div>
+                    </div>
+                    <!-- Disk -->
+                    <div class="dash-card">
+                        <div class="dash-card-header"><i class="fas fa-hdd"></i> 磁盘</div>
+                        <div class="dash-card-body" id="diskCard">
+                            <div class="metric-value"><span id="diskPercent">--</span>%</div>
+                            <div class="progress-bar"><div class="progress-fill disk" id="diskBar" style="width:0%"></div></div>
+                            <div class="metric-sub" id="diskDetail">-- / --</div>
+                        </div>
+                    </div>
+                    <!-- GPU cards (populated by JS) -->
+                    <div class="dash-card dash-card-wide" id="gpuCard0" style="display:none;">
+                        <div class="dash-card-header"><i class="fas fa-tv"></i> GPU 0</div>
+                        <div class="dash-card-body">
+                            <div class="metric-label" id="gpu0Name">--</div>
+                            <div class="gpu-metrics">
+                                <div class="gpu-metric">
+                                    <span class="gpu-metric-label">显存</span>
+                                    <div class="progress-bar"><div class="progress-fill gpu" id="gpu0MemBar" style="width:0%"></div></div>
+                                    <span class="gpu-metric-val" id="gpu0Mem">--</span>
+                                </div>
+                                <div class="gpu-metric">
+                                    <span class="gpu-metric-label">利用率</span>
+                                    <div class="progress-bar"><div class="progress-fill gpu" id="gpu0UtilBar" style="width:0%"></div></div>
+                                    <span class="gpu-metric-val" id="gpu0Util">--%</span>
+                                </div>
+                                <div class="gpu-metric">
+                                    <span class="gpu-metric-label">温度</span>
+                                    <span class="gpu-metric-val" id="gpu0Temp">--°C</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dash-card dash-card-wide" id="gpuCard1" style="display:none;">
+                        <div class="dash-card-header"><i class="fas fa-tv"></i> GPU 1</div>
+                        <div class="dash-card-body">
+                            <div class="metric-label" id="gpu1Name">--</div>
+                            <div class="gpu-metrics">
+                                <div class="gpu-metric">
+                                    <span class="gpu-metric-label">显存</span>
+                                    <div class="progress-bar"><div class="progress-fill gpu" id="gpu1MemBar" style="width:0%"></div></div>
+                                    <span class="gpu-metric-val" id="gpu1Mem">--</span>
+                                </div>
+                                <div class="gpu-metric">
+                                    <span class="gpu-metric-label">利用率</span>
+                                    <div class="progress-bar"><div class="progress-fill gpu" id="gpu1UtilBar" style="width:0%"></div></div>
+                                    <span class="gpu-metric-val" id="gpu1Util">--%</span>
+                                </div>
+                                <div class="gpu-metric">
+                                    <span class="gpu-metric-label">温度</span>
+                                    <span class="gpu-metric-val" id="gpu1Temp">--°C</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Services -->
+                    <div class="dash-card dash-card-wide">
+                        <div class="dash-card-header"><i class="fas fa-server"></i> 微服务状态</div>
+                        <div class="dash-card-body">
+                            <table class="svc-table" id="svcTable">
+                                <thead><tr><th>服务</th><th>端口</th><th>状态</th><th>操作</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td>PaddleOCR</td><td>8802</td><td class="svc-status" id="svc-8802">--</td>
+                                        <td class="svc-actions">
+                                            <button class="btn btn-sm btn-ghost" onclick="svcAction('restart','paddleocr',this)"><i class="fas fa-redo"></i></button>
+                                            <button class="btn btn-sm btn-ghost" onclick="svcAction('start','paddleocr',this)"><i class="fas fa-play"></i></button>
+                                            <button class="btn btn-sm btn-ghost" onclick="svcAction('stop','paddleocr',this)"><i class="fas fa-stop"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>IndexTTS</td><td>6006</td><td class="svc-status" id="svc-6006">--</td>
+                                        <td class="svc-actions">
+                                            <button class="btn btn-sm btn-ghost" onclick="svcAction('restart','tts',this)"><i class="fas fa-redo"></i></button>
+                                            <button class="btn btn-sm btn-ghost" onclick="svcAction('start','tts',this)"><i class="fas fa-play"></i></button>
+                                            <button class="btn btn-sm btn-ghost" onclick="svcAction('stop','tts',this)"><i class="fas fa-stop"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Wav2Lip</td><td>5000</td><td class="svc-status" id="svc-5000">--</td>
+                                        <td class="svc-actions">
+                                            <button class="btn btn-sm btn-ghost" onclick="svcAction('restart','wav2lip',this)"><i class="fas fa-redo"></i></button>
+                                            <button class="btn btn-sm btn-ghost" onclick="svcAction('start','wav2lip',this)"><i class="fas fa-play"></i></button>
+                                            <button class="btn btn-sm btn-ghost" onclick="svcAction('stop','wav2lip',this)"><i class="fas fa-stop"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>DigitalHuman</td><td>9088</td><td class="svc-status" id="svc-9088">--</td>
+                                        <td class="svc-actions">
+                                            <button class="btn btn-sm btn-warning" onclick="svcAction('restart','digital',this)" title="重启后页面将短暂断开"><i class="fas fa-redo"></i> 重启</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Connections -->
+                    <div class="dash-card">
+                        <div class="dash-card-header"><i class="fas fa-plug"></i> WebSocket 连接</div>
+                        <div class="dash-card-body" id="wsConnCard">
+                            <div class="metric-value"><span id="wsConnCount">0</span></div>
+                            <div class="metric-sub">活跃连接数</div>
+                            <div id="wsConnList" style="margin-top:8px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== Tab 2: 实时控制台 ==================== -->
+            <section class="tab-pane" id="tab-console">
+                <div class="console-toolbar">
+                    <div class="toolbar-left">
+                        <span class="toolbar-title"><i class="fas fa-terminal"></i> 实时控制台</span>
+                        <span class="log-counter">日志: <span id="logCount">0</span></span>
+                    </div>
+                    <div class="toolbar-right">
+                        <select id="logFilter" class="select-sm">
+                            <option value="all">全部</option>
+                            <option value="INFO">INFO</option>
+                            <option value="DEBUG">DEBUG</option>
+                            <option value="WARNING">WARNING</option>
+                            <option value="ERROR">ERROR</option>
+                            <option value="CRITICAL">CRITICAL</option>
+                        </select>
+                        <button class="btn btn-sm btn-ghost" onclick="toggleAutoScroll()" id="autoScrollBtn"><i class="fas fa-arrow-down"></i> 自动滚动</button>
+                        <button class="btn btn-sm btn-ghost" onclick="clearConsole()"><i class="fas fa-trash"></i> 清空</button>
+                        <button class="btn btn-sm btn-ghost" onclick="togglePause()" id="pauseBtn"><i class="fas fa-pause"></i> 暂停</button>
+                        <button class="btn btn-sm btn-ghost" onclick="exportLogs()"><i class="fas fa-download"></i> 导出</button>
+                    </div>
+                </div>
+                <div class="console-output" id="consoleOutput">
+                    <div class="welcome-message">
+                        <i class="fas fa-broadcast-tower"></i>
+                        <h3>控制台监控已就绪</h3>
+                        <p>等待日志输出...</p>
+                    </div>
+                </div>
+                <div class="console-input-bar">
+                    <span class="input-prefix"><i class="fas fa-angle-right"></i></span>
+                    <input type="text" id="consoleInput" placeholder="输入命令 (help 查看可用命令)..." autocomplete="off">
+                    <button class="btn btn-sm btn-primary" onclick="sendCommand()"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </section>
+
+            <!-- ==================== Tab 3: 日志文件 ==================== -->
+            <section class="tab-pane" id="tab-logfiles">
+                <div class="logfile-toolbar">
+                    <div class="logfile-tabs" id="logfileTabs">
+                        <button class="logfile-tab active" data-log="digital">DigitalHuman</button>
+                        <button class="logfile-tab" data-log="tts">TTS</button>
+                        <button class="logfile-tab" data-log="wav2lip">Wav2Lip</button>
+                        <button class="logfile-tab" data-log="paddleocr">PaddleOCR</button>
+                        <button class="logfile-tab" data-log="cleanup">Cleanup</button>
+                    </div>
+                    <div class="logfile-controls">
+                        <select id="logLineCount" class="select-sm">
+                            <option value="50">50 行</option>
+                            <option value="100" selected>100 行</option>
+                            <option value="200">200 行</option>
+                            <option value="500">500 行</option>
+                        </select>
+                        <button class="btn btn-sm btn-ghost" onclick="loadLogFile()"><i class="fas fa-sync-alt"></i> 刷新</button>
+                        <button class="btn btn-sm btn-ghost" onclick="downloadLogFile()"><i class="fas fa-download"></i> 下载</button>
+                        <label class="toggle-label"><input type="checkbox" id="logAutoRefresh" checked> 自动刷新</label>
+                    </div>
+                </div>
+                <div class="logfile-output" id="logfileOutput">
+                    <div class="loading">选择日志文件加载...</div>
+                </div>
+            </section>
+
+            <!-- ==================== Tab 4: 视频管理 ==================== -->
+            <section class="tab-pane" id="tab-videos">
+                <div class="panel-toolbar">
+                    <span class="toolbar-title"><i class="fas fa-film"></i> 视频管理</span>
+                    <button class="btn btn-sm btn-ghost" onclick="loadVideoList()"><i class="fas fa-sync-alt"></i> 刷新</button>
+                </div>
+                <div class="video-table-wrap" id="videoTableWrap">
+                    <div class="loading">加载视频列表...</div>
+                </div>
+            </section>
+
+            <!-- ==================== Tab 5: 系统控制 ==================== -->
+            <section class="tab-pane" id="tab-controls">
+                <div class="ctrl-grid">
+                    <!-- 清理操作 -->
+                    <div class="ctrl-card">
+                        <div class="dash-card-header"><i class="fas fa-broom"></i> 文件清理</div>
+                        <div class="dash-card-body">
+                            <p class="ctrl-desc">清理未引用的静态文件、临时文件、PPT上传和BGM文件。</p>
+                            <button class="btn btn-primary" onclick="executeCleanup()"><i class="fas fa-play"></i> 执行清理</button>
+                            <div id="cleanupResult" class="ctrl-result"></div>
+                        </div>
+                    </div>
+                    <!-- 定时任务 -->
+                    <div class="ctrl-card">
+                        <div class="dash-card-header"><i class="fas fa-clock"></i> 定时任务</div>
+                        <div class="dash-card-body">
+                            <div id="schedulerJobs">加载中...</div>
+                            <button class="btn btn-sm btn-ghost" onclick="loadSchedulerJobs()" style="margin-top:8px;"><i class="fas fa-sync-alt"></i> 刷新</button>
+                        </div>
+                    </div>
+                    <!-- 日志级别 -->
+                    <div class="ctrl-card">
+                        <div class="dash-card-header"><i class="fas fa-layer-group"></i> 日志级别</div>
+                        <div class="dash-card-body">
+                            <div class="ctrl-row">
+                                <span>当前级别: <strong id="currentLogLevel">--</strong></span>
+                            </div>
+                            <div class="ctrl-row" style="margin-top:8px;">
+                                <select id="logLevelSelect" class="select-sm">
+                                    <option value="DEBUG">DEBUG</option>
+                                    <option value="INFO">INFO</option>
+                                    <option value="WARNING">WARNING</option>
+                                    <option value="ERROR">ERROR</option>
+                                </select>
+                                <button class="btn btn-sm btn-primary" onclick="changeLogLevel()">应用</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 测试日志 -->
+                    <div class="ctrl-card">
+                        <div class="dash-card-header"><i class="fas fa-vial"></i> 测试日志</div>
+                        <div class="dash-card-body">
+                            <div class="ctrl-row">
+                                <input type="text" id="customMessage" placeholder="日志消息..." class="input-sm">
+                                <select id="testLogLevel" class="select-sm">
+                                    <option value="INFO">INFO</option>
+                                    <option value="WARNING">WARNING</option>
+                                    <option value="ERROR">ERROR</option>
+                                </select>
+                                <button class="btn btn-sm btn-primary" onclick="sendCustomLog()"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                            <div class="ctrl-row" style="margin-top:8px;gap:6px;">
+                                <button class="btn btn-sm btn-ghost" onclick="testLog('INFO')">INFO</button>
+                                <button class="btn btn-sm btn-warning" onclick="testLog('WARNING')">WARNING</button>
+                                <button class="btn btn-sm btn-danger" onclick="testLog('ERROR')">ERROR</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- 底部状态栏 -->
+        <footer class="bottom-bar">
+            <span><i class="fas fa-server"></i> <span id="serverStatus" class="status-up">运行中</span></span>
+            <span><i class="fas fa-clock"></i> 更新: <span id="lastUpdate">--</span></span>
+            <span><i class="fas fa-code"></i> FastAPI & WebSocket</span>
+        </footer>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

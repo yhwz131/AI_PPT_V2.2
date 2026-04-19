@@ -1,0 +1,40 @@
+{
+  "data": [
+    {
+      "name": "杨奇鸿",
+      "brief": "大家好，我是杨奇鸿，性格开朗踏实，做事认真有责任心，乐于在学习和交流中积累成长，也期待能和身边的伙伴并肩同行，共赴新程。",
+      "audio": "/static/Digital_human/Built-in_digital_human/audio/杨奇鸿.mp3",
+      "image": "/static/Digital_human/Built-in_digital_human/image/杨奇鸿.jpg",
+      "video": "/static/Digital_human/Built-in_digital_human/video/杨奇鸿.mp4"
+    },
+    {
+      "name": "侯老师",
+      "brief": "大家好，我是侯老师，秉持用心教学、耐心引导的理念，注重因材施教，愿陪伴同学们在学习中夯实基础、探索新知，一起稳步前行、收获成长。",
+      "audio": "/static/Digital_human/Built-in_digital_human/audio/侯老师.mp3",
+      "image": "/static/Digital_human/Built-in_digital_human/image/侯老师.jpg",
+      "video": "/static/Digital_human/Built-in_digital_human/video/侯老师.mp4"
+    },
+    {
+      "name": "周星驰",
+      "brief": "大家好，我是周星驰。我这个人，拍戏做事比较认真，有点执着，也喜欢尝试新的东西。一路走来，都是在片场摸爬滚打、边做边学。希望能继续用电影带来欢笑和一点思考，和台前幕后的每一位，一起走下去，拍出更好的下一部。",
+      "audio": "/static/Digital_human/Built-in_digital_human/audio/周星驰.mp3",
+      "image": "/static/Digital_human/Built-in_digital_human/image/周星驰.jpg",
+      "video": "/static/Digital_human/Built-in_digital_human/video/周星驰.mp4"
+    },
+    {
+      "name": "郭老师",
+      "brief": "大家好，我是郭老师。我坚信教育贵在“用心”与“耐心”，致力于因材施教，陪伴每一位同学夯实基础、探索新知。期待与你们携手，在学习之路上稳步前行，共同收获成长的喜悦。",
+      "audio": "/static/Digital_human/Built-in_digital_human/audio/郭老师.mp3",
+      "image": "/static/Digital_human/Built-in_digital_human/image/郭老师.jpg",
+      "video": "/static/Digital_human/Built-in_digital_human/video/郭老师.mp4"
+    },
+    {
+      "name": "彭于晏",
+      "brief": "大家好，我是彭于晏。我信奉“把努力变成习惯”，无论是体能还是角色，都愿意下笨功夫去打磨。我享受为目标全情投入的过程，也期待与志同道合的团队一起，挑战未知，创作出属于我们自己的硬核作品。",
+      "audio": "/static/Digital_human/Built-in_digital_human/audio/彭于晏.mp3",
+      "image": "/static/Digital_human/Built-in_digital_human/image/彭于晏.jpg",
+      "video": "/static/Digital_human/Built-in_digital_human/video/彭于晏.mp4"
+    }
+   
+  ]
+}

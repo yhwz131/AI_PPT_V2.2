@@ -1,0 +1,13 @@
+vllm==0.16.0
+matplotlib==3.8.4
+omegaconf
+sentencepiece
+librosa
+gradio
+ninja
+modelscope
+munch==4.0.0
+loguru
+
+WeTextProcessing; platform_machine != "Darwin"
+wetext; platform_system == "Darwin"

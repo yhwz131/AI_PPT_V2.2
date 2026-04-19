@@ -1,0 +1,108 @@
+一.环境准备
+1.1 创建虚拟环境：
+
+conda create --name ppocrvl python==3.11 -y
+
+切入虚拟环境
+
+conda activate ppocrvl
+
+更新pip
+
+python -m pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple/
+
+2.安装 PaddleOCR 工具框架
+
+2.1 paddlepaddle-gpu==3.2.1安装
+
+https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/develop/install/pip/linux-pip.html
+
+需要检查cuda的版本：【目前版本12.4】
+
+
+这里我们需要选择11.8 ppocr版本进行安装【原则一定不要超出你的CUDA驱动版本】
+python3 -m pip install paddlepaddle-gpu==3.2.1 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
+2.2 pp-gpu版本测试：
+  python
+  import paddle
+  paddle.utils.run_check()
+
+说明安装成功，加入没有安装成功，检查CUDA版本是否对应，原则<=CUDA版本的安装方式。
+2.2 PaddleOCR-VL 使用safetensors格式存储模型权重：【我没有找到11.8版本】
+ python -m pip install https://paddle-whl.bj.bcebos.com/nightly/cu126/safetensors/safetensors-0.6.2.dev0-cp38-abi3-linux_x86_64.whl
+二、模型下载
+1.1 创建项目文件夹
+ mkdir PaddleOCR-VL
+ cd  PaddleOCR-VL
+ mkdir models
+1.2 使用魔搭社区下载
+from modelscope import snapshot_download
+model_dir = snapshot_download('PaddlePaddle/PaddleOCR-VL',local_dir='./models/PaddleOCR-VL-0.9B')
+
+三、本地运行测试：
+1.1 希望使用文档解析、文档理解、文档翻译、关键信息抽取等全部功能
+python -m pip install "paddleocr[all]"
+1.2 需要依赖：【这里报错，先不用管它，后续我们在考虑】
+
+2.进行本次测试：
+
+paddleocr doc_parser \
+    --input https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/paddleocr_vl_demo.png\
+    --save_path ./output \
+    --vl_rec_model_dir /home/being/workspace/paddleocr/models/PaddleOCR-VL-0.9B \
+    --layout_detection_model_dir /home/being/workspace/paddleocr/models/PaddleOCR-VL-0.9B/PP-DocLayoutV2
+四、jupyter lab 服务端映射及启动:
+
+接下来继续安装Jupyter及响应的kernel：
+
+pip install ipykernel -i https://pypi.tuna.tsinghua.edu.cn/simple
+python -m ipykernel install --user --name ppocrvl  --display-name "Python (ppocr)"
+五 、进行测试：
+from paddleocr import PaddleOCRVL
+
+# 关键：模型路径参数要在初始化时传入，而不是在 predict() 中
+pipeline = PaddleOCRVL(
+    vl_rec_model_dir="/home/ubuntu/workspace/PaddleOCR-VL/models/PaddleOCR-VL-0.9B",
+    layout_detection_model_dir="/home/ubuntu/workspace/PaddleOCR-VL/models/PaddleOCR-VL-0.9B/PP-DocLayoutV2"
+)
+
+# predict 只需要传入输入文件和保存路径
+# save_path 参数会自动保存可视化图片（布局检测结果和阅读顺序图）
+output = pipeline.predict(
+    input="./image/图2.png",
+    save_path="./output"
+)
+
+for res in output:
+    res.print()  # 打印识别结果
+    res.save_to_json(save_path="./output")  # 保存JSON格式
+    res.save_to_markdown(save_path="./output")  # 保存Markdown格式
+    res.save_to_img(save_path="./output")  # 保存可视化图片（带标注框）
+1.1 测试表格：
+
+
+
+效果比较好。
+1.2 流程图：
+【无法做到多模态】
+
+
+1.3 pdf授课进度计划表：【按照页码进行切分，很奈斯，但是存在跨页切分的问题】
+
+
+1.4 pdf的课标准进行测试：【还是跨页出现的小问题需要解决】
+++++++++++++++++++++++++++++++++++++++++添加相关依赖包+++++++++++++++++++++++++++++++++++++++++
+pip install fastapi uvicorn html2text -i  https://pypi.tuna.tsinghua.edu.cn/simple
+
+pip install python-multipart -i  https://pypi.tuna.tsinghua.edu.cn/simple
+
+
+
+
+
+
+
+
+
+
+

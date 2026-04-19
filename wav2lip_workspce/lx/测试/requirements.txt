@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pydantic
+opencv-python<5
+numpy<2
+mediapipe==0.10.9
+protobuf==3.20.3
+typing-extensions<5
