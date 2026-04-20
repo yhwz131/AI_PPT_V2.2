@@ -87,9 +87,21 @@
 | `fetchDigitalHumans('built-in')` | GET | `/static/Digital_human/Built-in_digital_human.json` | 内置数字人目录 |
 | `fetchDigitalHumans('custom')` | GET | `/static/Digital_human/Customized_digital_human.json` | 自定义数字人目录 |
 | `uploadCustomDigitalHuman(...)` | POST | `/my_digital_human/digital-human/upload` | `multipart`：`name`、`brief`、`avatar`、`audio`、`video` |
-| `deleteDigitalHuman(name)` | DELETE | `/my_digital_human/digital-human/{name}` | 按名称删除自定义数字人 |
+| `deleteDigitalHuman(name)` | DELETE | `/my_digital_human/digital-human/{name}` | 按名称删除自定义数字人（同步从 JSON 目录移除） |
 
 对应后端：`routers/my_digital_human.py`（上传/删除）；JSON 由静态文件服务。
+
+**自定义数字人添加弹窗（`CustomDigitalHumanDialog.vue`，2026-04-20 升级）**：
+
+| 输入方式 | 头像图片 | 音频 | 视频 |
+|----------|----------|------|------|
+| 文件系统 | `input[type=file][accept="image/*"]` | `input[type=file][accept="audio/*"]` | `input[type=file][accept="video/*"]` |
+| 摄像头 | 「拍照」：打开前置摄像头实时预览，点击截帧生成 PNG | — | 「录制视频」：开始录制计时，停止后生成 WebM |
+| 麦克风 | — | 「录音」：开始/停止录制，生成 WebM 音频并支持试听 | — |
+
+必填项（名称 / **简介** / 头像 / 音频 / 视频）在提交时均触发前端校验：未填项显示红色边框与错误提示。文件选择与录制可交替使用，后选覆盖前选。
+
+**上传错误展示优化**：`client.ts` 的 `extractError` 对后端返回的 `detail` 做类型区分——字符串直接返回，数组（FastAPI 422 验证错误）取每项 `msg` 拼接，对象则 `JSON.stringify`；`UploadPage.vue` 的 `doUploadCustom` 在 `catch` 中增加 `instanceof Error` 判断，确保所有异常类型均能正确展示为可读信息。
 
 ### 4.6 生成页 — 步骤 1：背景音乐
 
@@ -177,6 +189,7 @@
 | SSE | `frontend-new/src/composables/useSSE.ts` |
 | 上传与生成主流程 | `frontend-new/src/pages/UploadPage.vue` |
 | 欢迎字幕 | `frontend-new/src/components/WelcomeTextConfig.vue` |
+| 自定义数字人弹窗（含摄像头/麦克风/校验） | `frontend-new/src/components/CustomDigitalHumanDialog.vue` |
 | 后端路由 | `digital_human_interface/routers/files.py`、`conversion.py`、`my_digital_human.py` |
 
 ---

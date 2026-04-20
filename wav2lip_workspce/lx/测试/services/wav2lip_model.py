@@ -18,6 +18,11 @@ _device = None
 _face_detector = None
 _lock = threading.Lock()
 
+def _sharpen_face(face_img, strength=0.4):
+    """轻量级 unsharp-mask 锐化，提升 Wav2Lip 96x96 上采样后的面部清晰度"""
+    blurred = cv2.GaussianBlur(face_img, (0, 0), 3)
+    return cv2.addWeighted(face_img, 1.0 + strength, blurred, -strength, 0)
+
 WAV2LIP_DIR = None
 CHECKPOINT_PATH = None
 
@@ -117,6 +122,8 @@ def _face_detect_cached(images, pads, batch_size=16):
                     detector.get_detections_for_batch(np.array(images[i:i + bs]))
                 )
         except RuntimeError:
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
             if bs == 1:
                 raise
             bs //= 2
@@ -236,13 +243,30 @@ def infer(face_video_path: str, audio_path: str, output_path: str) -> bool:
         if tmp_wav and os.path.exists(tmp_wav):
             os.remove(tmp_wav)
 
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            print("[Wav2Lip] CUDA cache cleared after inference")
+
         return os.path.exists(output_path)
 
     except Exception as e:
         print(f"[Wav2Lip] Inference error: {e}")
         import traceback
         traceback.print_exc()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         return False
+
+
+def clear_video_cache():
+    """清除视频帧缓存以释放内存"""
+    with _video_cache_lock:
+        _video_cache.clear()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    import gc
+    gc.collect()
+    print("[Wav2Lip] Video cache cleared & CUDA cache released")
 
 
 def _ensure_wav2lip_on_path():
@@ -271,8 +295,21 @@ def _process_batch(img_batch, mel_batch, frame_batch, coords_batch, img_size, ou
 
     pred = pred.cpu().numpy().transpose(0, 2, 3, 1) * 255.0
 
+    del img_t, mel_t
+
     for p, f, c in zip(pred, frame_batch, coords_batch):
         y1, y2, x1, x2 = c
         p = cv2.resize(p.astype(np.uint8), (x2 - x1, y2 - y1))
-        f[y1:y2, x1:x2] = p
+
+        p = _sharpen_face(p)
+
+        h, w = y2 - y1, x2 - x1
+        feather = np.zeros((h, w), dtype=np.float32)
+        cv2.ellipse(feather, (w // 2, h // 2), (w // 2 - 4, h // 2 - 4),
+                     0, 0, 360, 1.0, -1)
+        feather = cv2.GaussianBlur(feather, (15, 15), 0)
+        alpha = feather[..., np.newaxis]
+        roi = f[y1:y2, x1:x2].astype(np.float32)
+        f[y1:y2, x1:x2] = (alpha * p.astype(np.float32) + (1.0 - alpha) * roi).astype(np.uint8)
+
         out.write(f)

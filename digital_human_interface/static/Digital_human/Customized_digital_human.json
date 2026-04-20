@@ -13,6 +13,20 @@
             "image": "/static/Digital_human/Customized_digital_human/image/凑企鹅.jpg",
             "audio": "/static/Digital_human/Customized_digital_human/audio/凑企鹅.m4a",
             "video": "/static/Digital_human/Customized_digital_human/video/凑企鹅.mp4"
+        },
+        {
+            "name": "test",
+            "brief": "test",
+            "image": "/static/Digital_human/Customized_digital_human/image/test.png",
+            "audio": "/static/Digital_human/Customized_digital_human/audio/test.wav",
+            "video": "/static/Digital_human/Customized_digital_human/video/test.mp4"
+        },
+        {
+            "name": "test1",
+            "brief": "test1",
+            "image": "/static/Digital_human/Customized_digital_human/image/test1.png",
+            "audio": "/static/Digital_human/Customized_digital_human/audio/test1.wav",
+            "video": "/static/Digital_human/Customized_digital_human/video/test1.mp4"
         }
     ]
 }

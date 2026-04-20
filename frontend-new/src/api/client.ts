@@ -7,7 +7,10 @@ export interface ApiResponse<T = any> {
 }
 
 function extractError(err: any, fallback: string): string {
-  return err.detail || err.error || err.message || fallback
+  const raw = err.detail || err.error || err.message || fallback
+  if (typeof raw === 'string') return raw
+  if (Array.isArray(raw)) return raw.map((e: any) => e.msg || JSON.stringify(e)).join('; ')
+  return JSON.stringify(raw)
 }
 
 export async function apiGet<T = any>(path: string): Promise<ApiResponse<T>> {

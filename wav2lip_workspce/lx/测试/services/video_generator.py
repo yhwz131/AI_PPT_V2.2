@@ -23,21 +23,15 @@ class VideoGenerator:
         
         self.audio_processor = AudioProcessor()
         self.subtitle_service = SubtitleService()
-        
-        self.preset_sounds = {
-            "notifications": {
-                "completion_bell": os.path.join(config.sound_effects_dir, "notifications/completion_bell.wav"),
-                "success_chime": os.path.join(config.sound_effects_dir, "notifications/success_chime.wav")
-            },
-            "transitions": {
-                "swipe": os.path.join(config.sound_effects_dir, "transitions/swipe.wav"),
-                "whoosh": os.path.join(config.sound_effects_dir, "transitions/whoosh.wav")
-            },
-            "background": {
-                "corporate": os.path.join(config.sound_effects_dir, "background/corporate.mp3"),
-                "professional": os.path.join(config.sound_effects_dir, "background/professional.mp3")
-            }
-        }
+
+    @staticmethod
+    def _release_gpu_memory():
+        """任务结束后释放 GPU 显存缓存"""
+        try:
+            from services import wav2lip_model
+            wav2lip_model.clear_video_cache()
+        except Exception as e:
+            print(f"[VideoGenerator] GPU memory release skipped: {e}")
     
     def get_video_url(self, task_id: str) -> str:
         """获取视频的完整URL地址"""
@@ -167,7 +161,7 @@ class VideoGenerator:
                     f'fontfile={font_path}:x=(w-text_w)/2:y=(h-text_h)/2-100,'
                     f'drawtext=text=\'主题：{topic_name}\':fontcolor=yellow:fontsize=72:'
                     f'fontfile={font_path}:x=(w-text_w)/2:y=(h-text_h)/2+40" '
-                    f'-c:v libx264 -pix_fmt yuv420p -y "{temp_bg_path}"'
+                    f'-c:v libx264 -crf 18 -preset medium -pix_fmt yuv420p -y "{temp_bg_path}"'
                 )
                 subprocess.run(bg_cmd, shell=True, check=True)
                 
@@ -190,7 +184,8 @@ class VideoGenerator:
                 cmd = [
                     'ffmpeg', '-i', temp_bg_path, '-loop', '1', '-i', scaled_img_path,
                     '-filter_complex', filter_complex, '-t', str(duration),
-                    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-y', output_path
+                    '-c:v', 'libx264', '-crf', '18', '-preset', 'medium',
+                    '-pix_fmt', 'yuv420p', '-y', output_path
                 ]
                 subprocess.run(cmd, check=True)
                 
@@ -205,7 +200,7 @@ class VideoGenerator:
                     f'x=(w-text_w)/2:y=(h-text_h)/2-100,'
                     f'drawtext=text=\'{topic_name}\':fontcolor=yellow:fontsize=72:'
                     f'x=(w-text_w)/2:y=(h-text_h)/2" '
-                    f'-c:v libx264 -pix_fmt yuv420p -y "{output_path}"'
+                    f'-c:v libx264 -crf 18 -preset medium -pix_fmt yuv420p -y "{output_path}"'
                 )
                 subprocess.run(cmd, shell=True, check=True)
             
@@ -301,7 +296,7 @@ class VideoGenerator:
             cmd = (
                 f'ffmpeg -i "{input_video}" '
                 f'-vf "colorkey={color_value}:{similarity}:{blend},format=rgba" '
-                f'-c:v libx264 -pix_fmt yuva420p '
+                f'-c:v libx264 -crf 18 -preset medium -pix_fmt yuva420p '
                 f'-c:a aac -y "{output_video}"'
             )
 
@@ -370,9 +365,13 @@ class VideoGenerator:
                     else:
                         m = res.segmentation_mask
                         m = (m * 255.0).clip(0, 255).astype(np.uint8)
+                        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+                        m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, kernel)
+                        m = cv2.morphologyEx(m, cv2.MORPH_OPEN, kernel)
                         if blur_ksize > 1:
                             m = cv2.GaussianBlur(m, (blur_ksize, blur_ksize), 0)
-                        _, mask = cv2.threshold(m, int(threshold * 255), 255, cv2.THRESH_BINARY)
+                        thresh_val = int(threshold * 255)
+                        mask = np.where(m > thresh_val, m, 0).astype(np.uint8)
 
                     mask_bgr = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
                     writer.write(mask_bgr)
@@ -425,14 +424,13 @@ class VideoGenerator:
                 cmd = (
                     f'ffmpeg -i "{background_video}" -i "{digital_human_video}" -i "{digital_human_mask_video}" '
                     f'-filter_complex "{filter_complex}" '
-                    f'-c:v libx264 -pix_fmt yuv420p -c:a aac -y "{output_video}"'
+                    f'-c:v libx264 -crf 18 -preset medium -pix_fmt yuv420p -c:a aac -y "{output_video}"'
                 )
             else:
-                # 兼容旧逻辑：如果输入视频本身就带 alpha（如绿幕已抠成透明）则直接叠加
                 cmd = (
                     f'ffmpeg -i "{background_video}" -i "{digital_human_video}" '
                     f'-filter_complex "[1:v]format=rgba[fg];[0:v][fg]overlay={overlay_position}" '
-                    f'-c:v libx264 -pix_fmt yuv420p -c:a aac -y "{output_video}"'
+                    f'-c:v libx264 -crf 18 -preset medium -pix_fmt yuv420p -c:a aac -y "{output_video}"'
                 )
             
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -618,8 +616,8 @@ class VideoGenerator:
                     input_video=dh_resized,
                     output_mask_video=dh_mask,
                     model_selection=1,
-                    threshold=0.5,
-                    blur_ksize=11
+                    threshold=0.6,
+                    blur_ksize=21
                 )
                 if not mask_ok:
                     dh_transparent = os.path.join(temp_dir, "digital_human_transparent.mp4")
@@ -677,6 +675,8 @@ class VideoGenerator:
             
             # 清理临时文件
             shutil.rmtree(temp_dir)
+
+            self._release_gpu_memory()
             
             if os.path.exists(final_output):
                 tasks[task_id]['status'] = 'completed'
@@ -700,4 +700,5 @@ class VideoGenerator:
             
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir)
+            self._release_gpu_memory()
             return None

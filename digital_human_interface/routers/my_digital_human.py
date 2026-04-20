@@ -2003,11 +2003,30 @@ async def delete_digital_human(digital_human_name: str):
                             except Exception as e:
                                 print(f"删除文件失败: {file}, 错误: {e}")
 
-        if deleted_files:
+        json_path = os.path.join('static', 'Digital_human', 'Customized_digital_human.json')
+        json_removed = False
+        if os.path.exists(json_path):
+            try:
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    catalog = json.load(f)
+                original_len = len(catalog.get("data", []))
+                catalog["data"] = [
+                    item for item in catalog.get("data", [])
+                    if item.get("name") != digital_human_name
+                ]
+                if len(catalog["data"]) < original_len:
+                    with open(json_path, 'w', encoding='utf-8') as f:
+                        json.dump(catalog, f, ensure_ascii=False, indent=4)
+                    json_removed = True
+                    print(f"已从 JSON 目录中移除 '{digital_human_name}'")
+            except Exception as je:
+                print(f"更新 JSON 目录失败: {je}")
+
+        if deleted_files or json_removed:
             return {
                 "code": 200,
-                "message": f"成功删除 {len(deleted_files)} 个文件",
-                "data": {"status": "success", "deleted_files": deleted_files}
+                "message": f"成功删除数字人 '{digital_human_name}'",
+                "data": {"status": "success", "deleted_files": deleted_files, "json_removed": json_removed}
             }
         else:
             return {

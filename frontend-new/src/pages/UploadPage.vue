@@ -101,48 +101,13 @@
         </button>
       </div>
 
-      <!-- 自定义数字人上传弹窗 -->
-      <Teleport to="body">
-        <div v-if="showCustomUpload" class="modal-overlay" @click.self="showCustomUpload = false">
-          <div class="modal modal--sm">
-            <div class="modal__header">
-              <h3>添加自定义数字人</h3>
-              <button class="modal__close" @click="showCustomUpload = false">✕</button>
-            </div>
-            <div class="modal__body">
-              <div class="form-field">
-                <label>名称</label>
-                <input v-model="customDH.name" placeholder="数字人名称" />
-              </div>
-              <div class="form-field">
-                <label>简介</label>
-                <input v-model="customDH.brief" placeholder="简短描述" />
-              </div>
-              <div class="form-field">
-                <label>头像图片</label>
-                <input type="file" accept="image/*" @change="customDH.avatar = ($event.target as HTMLInputElement).files?.[0] || null" />
-              </div>
-              <div class="form-field">
-                <label>音频</label>
-                <input type="file" accept="audio/*" @change="customDH.audio = ($event.target as HTMLInputElement).files?.[0] || null" />
-              </div>
-              <div class="form-field">
-                <label>视频</label>
-                <input type="file" accept="video/*" @change="customDH.video = ($event.target as HTMLInputElement).files?.[0] || null" />
-              </div>
-            </div>
-            <div class="modal__footer">
-              <button
-                class="upload-page__btn upload-page__btn--primary"
-                :disabled="customUploading"
-                @click="doUploadCustom"
-              >
-                {{ customUploading ? '上传中...' : '上传' }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </Teleport>
+      <!-- 自定义数字人上传弹窗（含摄像头/麦克风/校验） -->
+      <CustomDigitalHumanDialog
+        ref="customDHDialogRef"
+        :visible="showCustomUpload"
+        @close="showCustomUpload = false"
+        @submit="doUploadCustom"
+      />
     </div>
 
     <!-- Step 2: 生成视频 -->
@@ -242,6 +207,7 @@ import AvatarSelector from '../components/AvatarSelector.vue'
 import BgmConfig from '../components/BgmConfig.vue'
 import WelcomeTextConfig from '../components/WelcomeTextConfig.vue'
 import EmotionConfig from '../components/EmotionConfig.vue'
+import CustomDigitalHumanDialog from '../components/CustomDigitalHumanDialog.vue'
 import GenerationProgress from '../components/GenerationProgress.vue'
 import { uploadPPT, generateScript } from '../api/files'
 import { pollConversionTask } from '../api/conversion'
@@ -339,12 +305,9 @@ const emoMethod = ref('natural')
 const emoVec = ref('0,0,0,0,0,0,0,1')
 const emoText = ref('')
 const showCustomUpload = ref(false)
-const customUploading = ref(false)
-const customDH = ref<{ name: string; brief: string; avatar: File | null; audio: File | null; video: File | null }>({
-  name: '', brief: '', avatar: null, audio: null, video: null
-})
 const avatarSelectorRef = ref<InstanceType<typeof AvatarSelector> | null>(null)
 const emotionConfigRef = ref<InstanceType<typeof EmotionConfig> | null>(null)
+const customDHDialogRef = ref<InstanceType<typeof CustomDigitalHumanDialog> | null>(null)
 
 const emoHasError = computed(() => {
   if (emoMethod.value !== 'vector') return false
@@ -360,22 +323,17 @@ function goToStep2() {
   step.value = 2
 }
 
-async function doUploadCustom() {
-  const { name, brief, avatar, audio, video } = customDH.value
-  if (!name || !avatar || !audio || !video) {
-    alert('请填写完整信息')
-    return
-  }
-  customUploading.value = true
+async function doUploadCustom(payload: { name: string; brief: string; avatar: File; audio: File; video: File }) {
+  customDHDialogRef.value?.setUploading(true)
   try {
-    await uploadCustomDigitalHuman(name, brief, avatar, audio, video)
+    await uploadCustomDigitalHuman(payload.name, payload.brief, payload.avatar, payload.audio, payload.video)
     showCustomUpload.value = false
-    customDH.value = { name: '', brief: '', avatar: null, audio: null, video: null }
+    customDHDialogRef.value?.resetAfterUpload()
     avatarSelectorRef.value?.reload()
   } catch (err: any) {
-    alert('上传失败: ' + err.message)
-  } finally {
-    customUploading.value = false
+    const msg = err instanceof Error ? err.message : String(err)
+    alert('上传失败: ' + msg)
+    customDHDialogRef.value?.setUploading(false)
   }
 }
 
@@ -920,79 +878,4 @@ onUnmounted(() => {
   margin-bottom: 16px;
 }
 
-/* Modal styles shared within this page */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.modal {
-  background: #fff;
-  border-radius: 16px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.modal--sm { width: 440px; }
-
-.modal__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
-}
-
-.modal__header h3 { font-size: 16px; font-weight: 600; }
-
-.modal__close {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: #f0f0f0;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal__body {
-  padding: 20px;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.modal__footer {
-  padding: 12px 20px;
-  border-top: 1px solid var(--border);
-  text-align: right;
-}
-
-.form-field {
-  margin-bottom: 14px;
-}
-
-.form-field label {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 4px;
-}
-
-.form-field input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 14px;
-}
 </style>

@@ -200,135 +200,37 @@ class FileCleanupService:
 
     def cleanup_unreferenced_files(self) -> Dict[str, int]:
         """
-        清理未引用的文件
-
-        返回:
-            清理统计信息
+        清理临时文件和上传缓存。
+        不触碰视频列表相关内容（PDF、合并视频、幻灯片图片、HLS 切片），
+        仅清理：音频临时文件、视频临时文件、PPT 上传缓存、BGM 上传缓存。
         """
         stats = {
-            'pdf_deleted': 0,
-            'video_deleted': 0,
-            'image_folders_deleted': 0,
-            'hls_folders_deleted': 0,
+            'audio_deleted': 0,
+            'temp_video_deleted': 0,
+            'uploads_deleted': 0,
+            'bgm_deleted': 0,
             'errors': 0
         }
 
         try:
-            # 1. 加载JSON数据
-            json_data = self.load_json_data()
-            if not json_data:
-                logger.error("无法加载JSON数据，清理终止")
-                return stats
-
-            # 2. 提取引用的文件名
-            referenced = self.extract_filenames_from_json(json_data)
-            referenced_pdf = referenced['pdf']
-            referenced_video = referenced['video']
-            referenced_image_folders = referenced['image_folders']
-            referenced_hls_folders = referenced['hls_folders']
-
-            logger.info(f"开始清理，共引用 {len(referenced_pdf)} 个PDF, {len(referenced_video)} 个视频")
-
-            # 3. 清理PDF文件
-            existing_pdf = self.get_all_files_with_extensions(self.path_config['pdf'], ['.pdf'])
-            for pdf_name in existing_pdf:
-                if pdf_name not in referenced_pdf:
-                    try:
-                        # 查找所有可能的PDF文件（包括不同扩展名大小写）
-                        pdf_files = []
-                        for file in os.listdir(self.path_config['pdf']):
-                            if file.lower().endswith('.pdf'):
-                                name_without_ext = os.path.splitext(file)[0]
-                                if name_without_ext == pdf_name:
-                                    pdf_files.append(file)
-
-                        # 删除所有匹配的PDF文件
-                        for pdf_file in pdf_files:
-                            pdf_path = os.path.join(self.path_config['pdf'], pdf_file)
-                            if os.path.exists(pdf_path):
-                                os.remove(pdf_path)
-                                stats['pdf_deleted'] += 1
-                                logger.info(f"删除未引用PDF: {pdf_path}")
-                    except Exception as e:
-                        logger.error(f"删除PDF文件失败 {pdf_name}: {e}")
-                        stats['errors'] += 1
-
-            # 4. 清理视频文件
-            existing_videos = self.get_all_files_with_extensions(self.path_config['video_mergers'],
-                                                                 ['.mp4', '.avi', '.mov', '.mkv'])
-            for video_name in existing_videos:
-                if video_name not in referenced_video:
-                    try:
-                        # 查找所有可能的视频文件
-                        video_files = []
-                        video_extensions = ['.mp4', '.avi', '.mov', '.mkv']
-                        for file in os.listdir(self.path_config['video_mergers']):
-                            for ext in video_extensions:
-                                if file.lower().endswith(ext):
-                                    name_without_ext = os.path.splitext(file)[0]
-                                    if name_without_ext == video_name:
-                                        video_files.append(file)
-                                        break
-
-                        # 删除所有匹配的视频文件
-                        for video_file in video_files:
-                            video_path = os.path.join(self.path_config['video_mergers'], video_file)
-                            if os.path.exists(video_path):
-                                os.remove(video_path)
-                                stats['video_deleted'] += 1
-                                logger.info(f"删除未引用视频: {video_path}")
-                    except Exception as e:
-                        logger.error(f"删除视频文件失败 {video_name}: {e}")
-                        stats['errors'] += 1
-
-            # 5. 清理图片文件夹
-            existing_image_folders = self.get_existing_files(self.path_config['images'], is_dir=True)
-            for folder_name in existing_image_folders:
-                if folder_name not in referenced_image_folders:
-                    try:
-                        folder_path = os.path.join(self.path_config['images'], folder_name)
-                        if os.path.exists(folder_path):
-                            # 删除文件夹及其所有内容
-                            shutil.rmtree(folder_path)
-                            stats['image_folders_deleted'] += 1
-                            logger.info(f"删除未引用图片文件夹: {folder_path}")
-                    except Exception as e:
-                        logger.error(f"删除图片文件夹失败 {folder_name}: {e}")
-                        stats['errors'] += 1
-
-            # 6. 清理HLS文件夹
-            existing_hls_folders = self.get_existing_files(self.path_config['hls'], is_dir=True)
-            for folder_name in existing_hls_folders:
-                if folder_name not in referenced_hls_folders:
-                    try:
-                        folder_path = os.path.join(self.path_config['hls'], folder_name)
-                        if os.path.exists(folder_path):
-                            # 删除文件夹及其所有内容
-                            shutil.rmtree(folder_path)
-                            stats['hls_folders_deleted'] += 1
-                            logger.info(f"删除未引用HLS文件夹: {folder_path}")
-                    except Exception as e:
-                        logger.error(f"删除HLS文件夹失败 {folder_name}: {e}")
-                        stats['errors'] += 1
-
-            # 7. 清理音频文件夹
             audio_deleted = self.cleanup_audio_folder()
-            logger.info(f"清理音频文件夹，删除 {audio_deleted} 个文件/文件夹")
+            stats['audio_deleted'] = audio_deleted
+            logger.info(f"清理音频临时文件，删除 {audio_deleted} 个文件/文件夹")
 
-            # 8. 清理临时视频文件夹
             temp_video_deleted = self.cleanup_temp_video_folder()
+            stats['temp_video_deleted'] = temp_video_deleted
             logger.info(f"清理临时视频文件夹，删除 {temp_video_deleted} 个文件/文件夹")
 
-            # 9. 清理 PPT 原文件（uploads 目录全清）
             uploads_deleted = self._cleanup_directory(self.path_config['uploads'])
+            stats['uploads_deleted'] = uploads_deleted
             logger.info(f"清理PPT上传目录，删除 {uploads_deleted} 个文件")
 
-            # 10. 清理 BGM 上传文件（bgm 目录全清）
             bgm_deleted = self._cleanup_directory(self.path_config['bgm'])
+            stats['bgm_deleted'] = bgm_deleted
             logger.info(f"清理BGM上传目录，删除 {bgm_deleted} 个文件")
 
-            logger.info(f"清理完成: 删除 {stats['pdf_deleted']} PDF, {stats['video_deleted']} 视频, "
-                        f"{stats['image_folders_deleted']} 图片文件夹, {stats['hls_folders_deleted']} HLS文件夹")
+            total = audio_deleted + temp_video_deleted + uploads_deleted + bgm_deleted
+            logger.info(f"清理完成: 共删除 {total} 个临时文件/文件夹（视频列表内容已保护）")
 
             return stats
 
