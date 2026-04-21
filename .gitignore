@@ -73,3 +73,10 @@ frontend-old/static/*.mp4
 */temp/
 image_output/
 uploaded_files/
+
+# MuseTalk（独立部署，不纳入主仓库）
+MuseTalk/
+start_musetalk.sh
+deploy/nginx-musetalk.conf
+
+.trae/

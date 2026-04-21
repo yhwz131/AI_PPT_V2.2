@@ -44,6 +44,36 @@
             "video_path": "/static/video/mergers/测试ppt.pptx.mp4",
             "m3u8_url": "/static/video/hls/c32a313d-730e-44f5-b227-634f79544b64/playlist.m3u8",
             "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/c32a313d-730e-44f5-b227-634f79544b64"
+        },
+        {
+            "file_name": "测试ppt.pptx",
+            "content_text": [
+                "大家好，今天我将为大家全面解析AI数字人项目。我们将从概念出发，深入探讨其实现的全流程。本次报告时间是2026年1月1日。",
+                "以上就是本次AI数字人项目的全部分享。感谢各位的聆听与关注，期待未来与大家有更多的交流。谢谢！"
+            ],
+            "img_lis": [
+                "/static/file/images/e46f7500-1f70-4efd-9481-06404ddb6c89/slide_001.png",
+                "/static/file/images/e46f7500-1f70-4efd-9481-06404ddb6c89/slide_002.png"
+            ],
+            "pdf_path": "static/file/pdf/e46f7500-1f70-4efd-9481-06404ddb6c89.pdf",
+            "video_path": "/static/video/mergers/测试ppt.pptx.mp4",
+            "m3u8_url": "/static/video/hls/e46f7500-1f70-4efd-9481-06404ddb6c89/playlist.m3u8",
+            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/e46f7500-1f70-4efd-9481-06404ddb6c89"
+        },
+        {
+            "file_name": "测试ppt.pptx",
+            "content_text": [
+                "大家好，欢迎来到本次分享。今天我们将深入解析AI数字人项目，从核心概念到具体实现，为您呈现一个完整的全流程解析。本次报告时间为2026年1月1日。",
+                "以上就是本次关于AI数字人项目的全部讲解内容。感谢各位的聆听与关注，期待未来与您有更多的交流与合作。谢谢大家！"
+            ],
+            "img_lis": [
+                "/static/file/images/65b4b0cf-52ee-4b14-b6b5-a0d08d965b7d/slide_001.png",
+                "/static/file/images/65b4b0cf-52ee-4b14-b6b5-a0d08d965b7d/slide_002.png"
+            ],
+            "pdf_path": "static/file/pdf/65b4b0cf-52ee-4b14-b6b5-a0d08d965b7d.pdf",
+            "video_path": "/static/video/mergers/测试ppt.pptx.mp4",
+            "m3u8_url": "/static/video/hls/65b4b0cf-52ee-4b14-b6b5-a0d08d965b7d/playlist.m3u8",
+            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/65b4b0cf-52ee-4b14-b6b5-a0d08d965b7d"
         }
     ]
 }

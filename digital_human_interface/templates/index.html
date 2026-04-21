@@ -114,6 +114,13 @@
                                     <span class="gpu-metric-val" id="gpu0Temp">--°C</span>
                                 </div>
                             </div>
+                            <div class="gpu-proc-toggle" onclick="toggleGpuProcs(0)" id="gpu0ProcToggle">
+                                <i class="fas fa-microchip"></i>
+                                <span>进程详情</span>
+                                <span class="gpu-proc-count" id="gpu0ProcCount">0 个进程</span>
+                                <i class="fas fa-chevron-down gpu-proc-chevron" id="gpu0ProcChevron"></i>
+                            </div>
+                            <div class="gpu-proc-list" id="gpu0ProcList" style="display:none;"></div>
                         </div>
                     </div>
                     <div class="dash-card dash-card-wide" id="gpuCard1" style="display:none;">
@@ -136,6 +143,13 @@
                                     <span class="gpu-metric-val" id="gpu1Temp">--°C</span>
                                 </div>
                             </div>
+                            <div class="gpu-proc-toggle" onclick="toggleGpuProcs(1)" id="gpu1ProcToggle">
+                                <i class="fas fa-microchip"></i>
+                                <span>进程详情</span>
+                                <span class="gpu-proc-count" id="gpu1ProcCount">0 个进程</span>
+                                <i class="fas fa-chevron-down gpu-proc-chevron" id="gpu1ProcChevron"></i>
+                            </div>
+                            <div class="gpu-proc-list" id="gpu1ProcList" style="display:none;"></div>
                         </div>
                     </div>
                     <!-- Services -->

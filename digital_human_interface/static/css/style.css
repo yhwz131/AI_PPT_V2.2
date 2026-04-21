@@ -69,6 +69,21 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#0f172a;
 .gpu-metric{display:grid;grid-template-columns:60px 1fr 80px;align-items:center;gap:8px;}
 .gpu-metric-label{font-size:.8rem;color:#94a3b8;}
 .gpu-metric-val{font-size:.8rem;color:#e2e8f0;text-align:right;font-family:'Roboto Mono',monospace;}
+/* GPU process dropdown */
+.gpu-proc-toggle{display:flex;align-items:center;gap:6px;margin-top:12px;padding:6px 8px;background:#0f172a;border:1px solid #334155;border-radius:6px;cursor:pointer;font-size:.8rem;color:#94a3b8;user-select:none;transition:background .2s;}
+.gpu-proc-toggle:hover{background:#1e293b;color:#e2e8f0;}
+.gpu-proc-count{margin-left:auto;font-family:'Roboto Mono',monospace;color:#60a5fa;font-size:.75rem;}
+.gpu-proc-chevron{font-size:.7rem;transition:transform .25s;margin-left:4px;}
+.gpu-proc-chevron.open{transform:rotate(180deg);}
+.gpu-proc-list{margin-top:4px;border:1px solid #334155;border-radius:6px;overflow:hidden;}
+.gpu-proc-row{display:grid;grid-template-columns:56px 1fr 80px;align-items:center;gap:8px;padding:6px 10px;font-size:.78rem;border-bottom:1px solid #1e293b;}
+.gpu-proc-row:last-child{border-bottom:none;}
+.gpu-proc-row:nth-child(odd){background:#0f172a;}
+.gpu-proc-row:nth-child(even){background:#131c2e;}
+.gpu-proc-pid{color:#64748b;font-family:'Roboto Mono',monospace;}
+.gpu-proc-name{color:#e2e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gpu-proc-mem{color:#06b6d4;font-family:'Roboto Mono',monospace;text-align:right;}
+.gpu-proc-empty{padding:10px;text-align:center;color:#475569;font-size:.78rem;}
 
 /* Service table */
 .svc-table{width:100%;border-collapse:collapse;font-size:.85rem;}

@@ -1017,9 +1017,10 @@ async def health_check():
 # ============ GPU 监控 API ============
 @app.get("/api/system/gpu")
 async def get_gpu_info():
-    """获取 GPU 信息（通过 nvidia-smi）"""
+    """获取 GPU 信息及进程列表（通过 nvidia-smi）"""
     import subprocess
     try:
+        # 查询 GPU 基础指标
         result = subprocess.run(
             ["nvidia-smi", "--query-gpu=index,name,memory.total,memory.used,memory.free,utilization.gpu,temperature.gpu",
              "--format=csv,noheader,nounits"],
@@ -1028,20 +1029,57 @@ async def get_gpu_info():
         if result.returncode != 0:
             return {"status": "error", "message": "nvidia-smi 执行失败", "gpus": []}
 
+        # 查询 GPU uuid → index 映射
+        uuid_result = subprocess.run(
+            ["nvidia-smi", "--query-gpu=index,uuid", "--format=csv,noheader"],
+            capture_output=True, text=True, timeout=5
+        )
+        uuid_to_idx = {}
+        for line in uuid_result.stdout.strip().split("\n"):
+            if not line.strip():
+                continue
+            parts = [p.strip() for p in line.split(",")]
+            if len(parts) == 2:
+                uuid_to_idx[parts[1]] = int(parts[0])
+
+        # 查询各 GPU 上的进程
+        proc_result = subprocess.run(
+            ["nvidia-smi", "--query-compute-apps=gpu_uuid,pid,process_name,used_memory",
+             "--format=csv,noheader,nounits"],
+            capture_output=True, text=True, timeout=5
+        )
+        procs_by_gpu: dict = {}
+        for line in proc_result.stdout.strip().split("\n"):
+            if not line.strip():
+                continue
+            parts = [p.strip() for p in line.split(",")]
+            if len(parts) >= 4:
+                gpu_uuid = parts[0]
+                gpu_idx = uuid_to_idx.get(gpu_uuid)
+                if gpu_idx is None:
+                    continue
+                procs_by_gpu.setdefault(gpu_idx, []).append({
+                    "pid": int(parts[1]),
+                    "name": parts[2],
+                    "memory_used": int(parts[3]) if parts[3].isdigit() else 0,
+                })
+
         gpus = []
         for line in result.stdout.strip().split("\n"):
             if not line.strip():
                 continue
             parts = [p.strip() for p in line.split(",")]
             if len(parts) >= 7:
+                idx = int(parts[0])
                 gpus.append({
-                    "index": int(parts[0]),
+                    "index": idx,
                     "name": parts[1],
                     "memory_total": int(parts[2]),
                     "memory_used": int(parts[3]),
                     "memory_free": int(parts[4]),
                     "utilization": int(parts[5]),
                     "temperature": int(parts[6]),
+                    "processes": procs_by_gpu.get(idx, []),
                 })
         return {"status": "success", "gpus": gpus}
     except FileNotFoundError:

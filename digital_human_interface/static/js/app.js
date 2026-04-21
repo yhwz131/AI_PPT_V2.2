@@ -110,8 +110,32 @@ async function loadGpuInfo() {
             document.getElementById('gpu' + i + 'UtilBar').style.width = g.utilization + '%';
             document.getElementById('gpu' + i + 'Util').textContent = g.utilization + '%';
             document.getElementById('gpu' + i + 'Temp').textContent = g.temperature + '°C';
+
+            // 更新进程列表内容（保持展开/收起状态）
+            const procs = g.processes || [];
+            document.getElementById('gpu' + i + 'ProcCount').textContent = procs.length + ' 个进程';
+            const listEl = document.getElementById('gpu' + i + 'ProcList');
+            if (procs.length === 0) {
+                listEl.innerHTML = '<div class="gpu-proc-empty">暂无运行中的进程</div>';
+            } else {
+                listEl.innerHTML = procs.map(p =>
+                    `<div class="gpu-proc-row">
+                        <span class="gpu-proc-pid">${p.pid}</span>
+                        <span class="gpu-proc-name" title="${p.name}">${p.name}</span>
+                        <span class="gpu-proc-mem">${p.memory_used} MiB</span>
+                    </div>`
+                ).join('');
+            }
         });
     } catch (e) { console.error('loadGpuInfo', e); }
+}
+
+function toggleGpuProcs(idx) {
+    const list = document.getElementById('gpu' + idx + 'ProcList');
+    const chevron = document.getElementById('gpu' + idx + 'ProcChevron');
+    const open = list.style.display === 'none';
+    list.style.display = open ? '' : 'none';
+    chevron.classList.toggle('open', open);
 }
 
 async function loadServicesStatus() {
