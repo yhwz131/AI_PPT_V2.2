@@ -23,6 +23,23 @@ class Config:
         
         self.wav2lip_dir = os.getenv("WAV2LIP_DIR", os.path.join(_project_root, "Wav2Lip"))
         self.wav2lip_checkpoint = os.getenv("WAV2LIP_CHECKPOINT", os.path.join(self.wav2lip_dir, "models", "Wav2Lip-SD-GAN.pt"))
+        self.musetalk_dir = os.getenv("MUSETALK_DIR", os.path.join(_project_root, "MuseTalk"))
+        self.musetalk_gpu_id = int(os.getenv("MUSETALK_GPU_ID", "0"))
+        self.musetalk_batch_size = int(os.getenv("MUSETALK_BATCH_SIZE", "8"))
+        self.musetalk_use_float16 = os.getenv("MUSETALK_USE_FLOAT16", "true").lower() in ("true", "1", "yes")
+        self.musetalk_vae_type = os.getenv("MUSETALK_VAE_TYPE", "sd-vae")
+        self.musetalk_unet_config = os.getenv(
+            "MUSETALK_UNET_CONFIG",
+            os.path.join(self.musetalk_dir, "models", "musetalk", "musetalk.json"),
+        )
+        self.musetalk_unet_path = os.getenv(
+            "MUSETALK_UNET_PATH",
+            os.path.join(self.musetalk_dir, "models", "musetalkV15", "unet.pth"),
+        )
+        self.musetalk_whisper_dir = os.getenv(
+            "MUSETALK_WHISPER_DIR",
+            os.path.join(self.musetalk_dir, "models", "whisper"),
+        )
 
         self.sfx_dir = os.path.join(_base, "assets", "sfx")
         self.default_notification_sound = os.getenv("SFX_NOTIFICATION", os.path.join(self.sfx_dir, "完成提示音.wav"))

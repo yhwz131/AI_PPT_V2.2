@@ -1,0 +1,33 @@
+#!/bin/bash
+# 检测暂存区中是否有关键目录的文件被删除
+PROTECTED_PATHS=(
+    "frontend-new/src/"
+    "wav2lip_workspce/lx/测试/services/"
+    "wav2lip_workspce/lx/测试/api/"
+    "digital_human_interface/routers/"
+    "digital_human_interface/services/"
+)
+
+DELETED=$(git diff --cached --name-only --diff-filter=D)
+if [ -z "$DELETED" ]; then
+    exit 0
+fi
+
+BLOCKED=""
+for file in $DELETED; do
+    for protected in "${PROTECTED_PATHS[@]}"; do
+        if [[ "$file" == "$protected"* ]]; then
+            BLOCKED="$BLOCKED\n  $file"
+        fi
+    done
+done
+
+if [ -n "$BLOCKED" ]; then
+    echo "============================================"
+    echo "  ⛔ 检测到关键文件被删除，commit 已阻止！"
+    echo "============================================"
+    echo -e "被删除的受保护文件:$BLOCKED"
+    echo ""
+    echo "如果确实需要删除，请使用: git commit --no-verify"
+    exit 1
+fi

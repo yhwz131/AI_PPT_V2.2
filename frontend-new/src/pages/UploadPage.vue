@@ -90,6 +90,28 @@
         @update:emo-text="emoText = $event"
       />
 
+      <div class="quality-mode-selector">
+        <h4 class="quality-mode-selector__title">生成质量</h4>
+        <div class="quality-mode-selector__options">
+          <label
+            class="quality-mode-option"
+            :class="{ 'quality-mode-option--active': qualityMode === 'fast' }"
+          >
+            <input type="radio" value="fast" v-model="qualityMode" />
+            <span class="quality-mode-option__label">快速模式</span>
+            <span class="quality-mode-option__desc">Wav2Lip · 速度快 · 适合预览</span>
+          </label>
+          <label
+            class="quality-mode-option"
+            :class="{ 'quality-mode-option--active': qualityMode === 'hd' }"
+          >
+            <input type="radio" value="hd" v-model="qualityMode" />
+            <span class="quality-mode-option__label">高清模式</span>
+            <span class="quality-mode-option__desc">MuseTalk · 画质优 · 适合正式发布</span>
+          </label>
+        </div>
+      </div>
+
       <div class="upload-page__actions">
         <button class="upload-page__btn" @click="step = 0">← 上一步</button>
         <button
@@ -146,6 +168,10 @@
             <div class="config-preview__item">
               <span class="config-preview__label">情感模式</span>
               <span class="config-preview__value">{{ emoLabel }}</span>
+            </div>
+            <div class="config-preview__item">
+              <span class="config-preview__label">生成质量</span>
+              <span class="config-preview__value">{{ qualityMode === 'hd' ? '高清 (MuseTalk)' : '快速 (Wav2Lip)' }}</span>
             </div>
             <div class="config-preview__item config-preview__item--full">
               <span class="config-preview__label">解说稿</span>
@@ -211,7 +237,7 @@ import CustomDigitalHumanDialog from '../components/CustomDigitalHumanDialog.vue
 import GenerationProgress from '../components/GenerationProgress.vue'
 import { uploadPPT, generateScript } from '../api/files'
 import { pollConversionTask } from '../api/conversion'
-import { createTask, checkTaskExists, uploadCustomDigitalHuman, deleteDigitalHuman, type DigitalHuman, type GenerationRequest } from '../api/digitalHuman'
+import { createTask, checkTaskExists, cancelTask, uploadCustomDigitalHuman, deleteDigitalHuman, type DigitalHuman, type GenerationRequest } from '../api/digitalHuman'
 import { useSSE } from '../composables/useSSE'
 import { useTimer } from '../composables/useTimer'
 import { staticUrl } from '../api/client'
@@ -297,6 +323,7 @@ function onScriptUpdate(html: string) {
 
 // ===== Step 1 state =====
 const template = ref('bottom-left')
+const qualityMode = ref<'fast' | 'hd'>('fast')
 const selectedAvatar = ref<DigitalHuman | null>(null)
 const welcomeText = ref('')
 const bgmMode = ref('default')
@@ -520,6 +547,7 @@ async function startGeneration() {
     emo_control_method: emoMethod.value,
     emo_vec: emoMethod.value === 'vector' ? emoVec.value : undefined,
     emo_text: emoMethod.value === 'text' ? emoText.value : undefined,
+    quality_mode: qualityMode.value,
   }
 
   try {
@@ -588,17 +616,31 @@ function initResultPlayer(url: string) {
   }
 }
 
-function doDownloadResult() {
+async function doDownloadResult() {
   if (!finalDownloadUrl.value) return
-  const a = document.createElement('a')
-  a.href = staticUrl(finalDownloadUrl.value)
-  a.download = downloadFileName.value || 'video.mp4'
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
+  const url = staticUrl(finalDownloadUrl.value)
+  const name = downloadFileName.value || 'video.mp4'
+  try {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = blobUrl
+    a.download = name
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(blobUrl)
+  } catch {
+    window.open(url, '_blank')
+  }
 }
 
-function cancelGeneration() {
+async function cancelGeneration() {
+  const taskId = typeof route.query.task === 'string' ? route.query.task : ''
+  if (taskId) {
+    await cancelTask(taskId)
+  }
   sseState.disconnect()
   generating.value = false
   timerState.stop()
@@ -876,6 +918,62 @@ onUnmounted(() => {
   border-radius: 10px;
   background: #000;
   margin-bottom: 16px;
+}
+
+.quality-mode-selector {
+  margin-top: 20px;
+}
+
+.quality-mode-selector__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.quality-mode-selector__options {
+  display: flex;
+  gap: 12px;
+}
+
+.quality-mode-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.quality-mode-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.quality-mode-option:hover {
+  border-color: var(--primary);
+  background: #f8f9ff;
+}
+
+.quality-mode-option--active {
+  border-color: var(--primary);
+  background: #f0f2ff;
+}
+
+.quality-mode-option__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.quality-mode-option__desc {
+  font-size: 12px;
+  color: var(--text-hint);
 }
 
 </style>

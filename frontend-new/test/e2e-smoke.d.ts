@@ -14,9 +14,9 @@
  */
 declare const API: string;
 interface ApiRes<T = any> {
-    code: number;
-    message: string;
-    data: T;
+  code: number;
+  message: string;
+  data: T;
 }
 declare function apiGet<T>(path: string): Promise<ApiRes<T>>;
 declare function apiPost<T>(path: string, body?: any): Promise<ApiRes<T>>;

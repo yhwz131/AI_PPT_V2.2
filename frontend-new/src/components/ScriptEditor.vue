@@ -8,14 +8,13 @@
       ref="editorRef"
       class="script-editor__body"
       contenteditable="true"
-      v-html="content"
       @input="onInput"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 
 const props = defineProps<{
   content: string
@@ -26,12 +25,30 @@ const emit = defineEmits<{
 }>()
 
 const editorRef = ref<HTMLElement | null>(null)
+let isInternalUpdate = false
 
 function onInput() {
   if (editorRef.value) {
+    isInternalUpdate = true
     emit('update', editorRef.value.innerHTML)
   }
 }
+
+watch(() => props.content, (newVal) => {
+  if (isInternalUpdate) {
+    isInternalUpdate = false
+    return
+  }
+  if (editorRef.value && editorRef.value.innerHTML !== newVal) {
+    editorRef.value.innerHTML = newVal
+  }
+})
+
+onMounted(() => {
+  if (editorRef.value) {
+    editorRef.value.innerHTML = props.content
+  }
+})
 </script>
 
 <style scoped>

@@ -253,13 +253,18 @@ class ZipProcessor:
                 # 按照要求格式输出对照关系
                 print(f"{file_path.name} -> {new_name}")
 
-            # 执行重命名操作
+            # 先用临时名避免同名冲突（如 audio_1.wav → audio_1.wav 会把自己删掉）
+            tmp_operations = []
             for file_path, new_name, new_path in rename_operations:
-                # 如果目标文件已存在，先删除
+                if file_path == new_path:
+                    continue
+                tmp_path = file_path.with_suffix(file_path.suffix + ".tmp_rename")
+                file_path.rename(tmp_path)
+                tmp_operations.append((tmp_path, new_path))
+            for tmp_path, new_path in tmp_operations:
                 if new_path.exists():
                     new_path.unlink()
-                # 执行重命名
-                file_path.rename(new_path)
+                tmp_path.rename(new_path)
 
             print("文件重命名完成")
             return True

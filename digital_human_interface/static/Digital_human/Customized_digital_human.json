@@ -1,32 +1,3 @@
 {
-    "data": [
-        {
-            "name": "测试",
-            "brief": "个大概 俄国人个人国台办二通过归档给二个人儿童",
-            "image": "/static/Digital_human/Customized_digital_human/image/测试.jpg",
-            "audio": "/static/Digital_human/Customized_digital_human/audio/测试.mp3",
-            "video": "/static/Digital_human/Customized_digital_human/video/测试.mp4"
-        },
-        {
-            "name": "凑企鹅",
-            "brief": "凑企鹅凑企鹅凑企鹅凑",
-            "image": "/static/Digital_human/Customized_digital_human/image/凑企鹅.jpg",
-            "audio": "/static/Digital_human/Customized_digital_human/audio/凑企鹅.m4a",
-            "video": "/static/Digital_human/Customized_digital_human/video/凑企鹅.mp4"
-        },
-        {
-            "name": "test",
-            "brief": "test",
-            "image": "/static/Digital_human/Customized_digital_human/image/test.png",
-            "audio": "/static/Digital_human/Customized_digital_human/audio/test.wav",
-            "video": "/static/Digital_human/Customized_digital_human/video/test.mp4"
-        },
-        {
-            "name": "test1",
-            "brief": "test1",
-            "image": "/static/Digital_human/Customized_digital_human/image/test1.png",
-            "audio": "/static/Digital_human/Customized_digital_human/audio/test1.wav",
-            "video": "/static/Digital_human/Customized_digital_human/video/test1.mp4"
-        }
-    ]
+  "data": []
 }

@@ -11,7 +11,7 @@ from typing import Optional
 from config import config
 from models import (
     VideoGenerationRequest, TaskStatusResponse, FileUploadResponse,
-    tasks, SoundEffectsConfig
+    tasks, cancelled_tasks, SoundEffectsConfig
 )
 from services.file_service import FileService
 from services.video_generator import VideoGenerator
@@ -147,6 +147,7 @@ async def generate_video(request: VideoGenerationRequest, background_tasks: Back
                 raise HTTPException(status_code=400, detail=f"文件不存在: {file_path}")
         
         settings = request.dict()
+        settings['is_first_page'] = (settings.pop('page_index', 0) == 0)
         task_id = str(uuid.uuid4())
         
         tasks[task_id] = {
@@ -191,7 +192,9 @@ async def generate_video_upload(
     topic_name: str = Form("AI 知识讲堂"),
     generate_subtitles: bool = Form(True),
     bgm_enabled: str = Form("true"),
-    bgm_path: Optional[str] = Form(None)
+    bgm_path: Optional[str] = Form(None),
+    quality_mode: str = Form("fast"),
+    page_index: int = Form(0)
 ):
     """生成数字人视频（使用文件上传）"""
     try:
@@ -235,6 +238,8 @@ async def generate_video_upload(
             'welcome_text': welcome_text,
             'topic_name': topic_name,
             'generate_subtitles': generate_subtitles,
+            'quality_mode': quality_mode,
+            'is_first_page': (page_index == 0),
             'sound_effects': {
                 'enabled': True,
                 'final_notification': {
@@ -271,6 +276,12 @@ async def generate_video_upload(
         def run_generation():
             try:
                 generator.generate_video(settings, task_id)
+            except Exception as e:
+                if tasks.get(task_id, {}).get('status') not in ('failed', 'cancelled'):
+                    tasks[task_id]['status'] = 'failed'
+                    tasks[task_id]['error'] = str(e)
+                    tasks[task_id]['progress'] = '生成失败'
+                    tasks[task_id]['end_time'] = datetime.now().isoformat()
             finally:
                 if os.path.exists(temp_dir):
                     shutil.rmtree(temp_dir)
@@ -332,12 +343,12 @@ async def get_task_status(task_id: str):
                 **response_data
             }
         )
-    elif task['status'] == 'failed':
+    elif task['status'] in ('failed', 'cancelled'):
         response_data['status_code'] = 500
         return JSONResponse(
             status_code=500,
             content={
-                "message": "视频生成失败",
+                "message": "视频生成失败" if task['status'] == 'failed' else "任务已取消",
                 **response_data
             }
         )
@@ -434,28 +445,127 @@ async def open_video_folder(task_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"打开文件夹失败: {str(e)}")
 
+@app.post("/cancel/{task_id}", summary="取消正在执行的任务")
+async def cancel_task(task_id: str):
+    """请求取消指定任务。已在运行的推理会在下一个检查点停止。"""
+    if task_id not in tasks:
+        raise HTTPException(status_code=404, detail="任务不存在")
+    task = tasks[task_id]
+    if task['status'] in ('completed', 'failed', 'cancelled'):
+        return {"message": f"任务已处于终态: {task['status']}", "task_id": task_id}
+    cancelled_tasks.add(task_id)
+    task['status'] = 'cancelled'
+    task['progress'] = '用户取消'
+    task['error'] = '任务已被取消'
+    task['end_time'] = datetime.now().isoformat()
+    print(f"[Cancel] 任务 {task_id} 已标记为取消")
+    return {"message": "任务已标记为取消", "task_id": task_id}
+
+
 @app.post("/cleanup", summary="清理已完成的任务")
 async def cleanup_tasks():
-    """清理24小时前已完成的任务"""
+    """清理 24 小时前已完成/失败的任务，以及超过 30 分钟仍卡在 processing/pending 的任务"""
     try:
-        cutoff_time = datetime.now().timestamp() - 24 * 3600
-        
+        now_ts = datetime.now().timestamp()
+        cutoff_old = now_ts - 24 * 3600
+        cutoff_stuck = now_ts - 30 * 60
+
         tasks_to_remove = []
         for task_id, task in tasks.items():
-            if task['status'] in ['completed', 'failed']:
-                created_time = datetime.fromisoformat(task['created_time']).timestamp()
-                if created_time < cutoff_time:
-                    if 'output_path' in task and os.path.exists(task['output_path']):
-                        os.remove(task['output_path'])
-                    tasks_to_remove.append(task_id)
-        
+            created_ts = datetime.fromisoformat(task['created_time']).timestamp()
+            if task['status'] in ['completed', 'failed', 'cancelled'] and created_ts < cutoff_old:
+                if 'output_path' in task and os.path.exists(task.get('output_path', '')):
+                    os.remove(task['output_path'])
+                tasks_to_remove.append(task_id)
+            elif task['status'] in ['processing', 'pending'] and created_ts < cutoff_stuck:
+                task['status'] = 'failed'
+                task['error'] = '任务超时 (>30min)，已自动标记失败'
+                task['end_time'] = datetime.now().isoformat()
+                print(f"[Cleanup] 卡死任务 {task_id} 已标记为 failed")
+                tasks_to_remove.append(task_id)
+
         for task_id in tasks_to_remove:
+            cancelled_tasks.discard(task_id)
             del tasks[task_id]
-        
+
         return {
             "message": f"清理了 {len(tasks_to_remove)} 个旧任务",
             "remaining_tasks": len(tasks)
         }
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"清理失败: {str(e)}")
+
+
+# ── MuseTalk 预处理缓存管理 API ──
+
+@app.get("/musetalk/cache/status", summary="查看 MuseTalk 预处理缓存状态")
+async def musetalk_cache_status():
+    entries = generator.list_cache_entries()
+    total_mb = sum(e["size_mb"] for e in entries)
+    return {
+        "total_entries": len(entries),
+        "total_size_mb": round(total_mb, 1),
+        "entries": entries,
+    }
+
+
+@app.post("/musetalk/preprocess", summary="对指定 face 文件执行预处理并缓存")
+async def musetalk_preprocess(face_path: str = Form(...)):
+    result = generator.preprocess_face(face_path)
+    return result
+
+
+@app.post("/musetalk/preprocess-all", summary="批量预处理所有数字人")
+async def musetalk_preprocess_all(background_tasks: BackgroundTasks):
+    """读取内置和自定义数字人 JSON，逐个预处理所有视频素材"""
+    import json as _json
+    from pathlib import Path
+
+    base = Path(__file__).resolve().parent.parent.parent.parent.parent / "digital_human_interface"
+    json_files = [
+        base / "static" / "Digital_human" / "Built-in_digital_human.json",
+        base / "static" / "Digital_human" / "Customized_digital_human.json",
+    ]
+
+    all_videos = []
+    for jf in json_files:
+        if not jf.exists():
+            continue
+        try:
+            data = _json.loads(jf.read_text(encoding="utf-8"))
+            for item in data.get("data", []):
+                video_rel = item.get("video", "")
+                if not video_rel:
+                    continue
+                vpath = str(base / video_rel.lstrip("/"))
+                if os.path.exists(vpath):
+                    all_videos.append({"name": item.get("name", ""), "path": vpath})
+        except Exception:
+            continue
+
+    def _run_batch():
+        results = []
+        for v in all_videos:
+            r = generator.preprocess_face(v["path"])
+            r["name"] = v["name"]
+            results.append(r)
+            print(f"[MuseTalk Preprocess] {v['name']}: {r.get('status')} - {r.get('message', '')}")
+        print(f"[MuseTalk Preprocess] 批量完成: {len(results)} 个数字人")
+
+    background_tasks.add_task(_run_batch)
+    return {
+        "status": "started",
+        "message": f"后台开始预处理 {len(all_videos)} 个数字人",
+        "videos": [{"name": v["name"], "path": v["path"]} for v in all_videos],
+    }
+
+
+@app.delete("/musetalk/cache/{cache_hash}", summary="清除指定缓存")
+async def musetalk_cache_delete(cache_hash: str):
+    return generator.clear_cache(cache_hash)
+
+
+@app.delete("/musetalk/cache", summary="清除全部缓存")
+async def musetalk_cache_clear():
+    return generator.clear_cache()

@@ -10,8 +10,45 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from config import config
 from api.routes import app
 
+def _preload_wav2lip():
+    """启动时预加载 Wav2Lip 模型 + 人脸检测器，消除推理时的冷启动开销"""
+    try:
+        from services import wav2lip_model
+        wav2lip_model.init(config.wav2lip_dir, config.wav2lip_checkpoint)
+        wav2lip_model.load()
+        print("Wav2Lip model + face detector preloaded successfully")
+    except Exception as e:
+        print(f"Wav2Lip preload failed (will use subprocess fallback): {e}")
+
+
+def _preload_whisper():
+    """启动时预加载 Whisper 模型，避免首个视频字幕生成时的冷启动"""
+    try:
+        from api.routes import generator
+        if generator.subtitle_service.load_whisper_model("large-v3"):
+            print("Whisper model preloaded successfully")
+        else:
+            print("Whisper preload returned False (may fall back to smaller model)")
+    except Exception as e:
+        print(f"Whisper preload failed (will load on first use): {e}")
+
+
+def _preload_musetalk():
+    """启动时预加载 MuseTalk 模型（VAE/UNet/PE/Whisper/FaceParsing），消除首次 HD 生成的 ~30s 冷启动"""
+    try:
+        from api.routes import generator
+        generator._init_musetalk()
+        print("MuseTalk model preloaded successfully")
+    except Exception as e:
+        print(f"MuseTalk preload failed (will load on first use): {e}")
+
+
 def main():
     print("🚀🚀🚀🚀 启动简体中文数字人视频生成器 FastAPI 服务...")
+    
+    _preload_wav2lip()
+    _preload_whisper()
+    _preload_musetalk()
     
     # 获取配置
     host_ip = config.host_ip

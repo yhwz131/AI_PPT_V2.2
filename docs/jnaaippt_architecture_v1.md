@@ -40,7 +40,7 @@ JNAAIPPT 是一个基于 AI 技术的数字人 PPT 视频生成系统，能够�
 │                             前端层 (Frontend)                            │
 │  ┌─────────────────────────────────────────────────────────────┐       │
 │  │  frontend-new/ — Vue 3 + Vite + TypeScript + vue-router       │       │
-│  │  （生产构建产物部署到 frontend/；另见 new_frontend/ 试验工程） │       │
+│  │  （生产 Nginx root → frontend-new/dist；可选副本 frontend/；另见 new_frontend/） │       │
 │  └─────────────────────────────────────────────────────────────┘       │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌────────────────────┐       │
 │  │ BGMConfig.vue   │  │ EmotionConfig   │  │ useSSE.ts          │       │
@@ -191,7 +191,7 @@ JNAAIPPT 是一个基于 AI 技术的数字人 PPT 视频生成系统，能够�
 │   ├── 文档索引.md                    # docs 总目录与前端目录对照
 │   └── 修缮与功能总结.md              # 功能变更记录
 │
-├── frontend-new/                    # 主前端 (Vue 3 + Vite + TS，构建 → frontend/)
+├── frontend-new/                    # 主前端 (Vue 3 + Vite + TS；vite build → dist/，Nginx 指向 dist/)
 │   ├── src/
 │   │   ├── pages/                   # IndexPage / UploadPage / VideoListPage
 │   │   ├── components/              # 业务组件
@@ -265,7 +265,7 @@ JNAAIPPT 是一个基于 AI 技术的数字人 PPT 视频生成系统，能够�
 │   │   └── digital_human_project/     # 备用项目
 │   └── Wav2Lip/                       # 官方 Wav2Lip 代码
 │
-├── frontend/                          # 部署的前端 (Nginx)，一般由 frontend-new 构建拷贝而来
+├── frontend/                          # 可选：构建产物副本（rsync）；生产主线为 frontend-new/dist
 │   ├── assets/                        # 静态资源
 │   └── index.html                     # 入口页面
 │
@@ -449,7 +449,7 @@ start_all.sh status
 | **index-tts-vllm** | 6006 | TTS 语音合成（`start_all.sh` 与 `tts_server_v2_batch.py`） |
 | **wav2lip** | 5000 | 数字人视频生成 |
 | **nginx** | 80/443 | 反向代理 |
-| **frontend-new** | 5173 (dev) | 前端开发服务器；构建产物部署到 **frontend/** |
+| **frontend-new** | 5173 (dev) | 前端开发服务器；生产 **`frontend-new/dist`**（Nginx root）；**frontend/** 为可选副本 |
 
 ---
 

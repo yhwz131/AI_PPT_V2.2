@@ -439,7 +439,7 @@ deploy_wav2lip() {
 }
 
 deploy_frontend() {
-  step "部署前端 (Vue 3 + Vite + TypeScript → frontend/)"
+  step "部署前端 (Vue 3 + Vite + TypeScript：build + 可选同步 frontend/)"
 
   if ! command -v node &>/dev/null; then
     warn "Node.js 未安装，跳过前端构建"
@@ -465,15 +465,14 @@ deploy_frontend() {
   info "构建前端 (npm run build)..."
   npm run build --prefix "$SVC_FRONTEND"
 
-  info "部署构建产物到 $PROJECT_ROOT/frontend/ ..."
+  info "生产环境 Nginx 静态根目录应指向: $SVC_FRONTEND/dist"
+  info "（可选）同步副本到 frontend/ 供旧配置或离线备份："
   mkdir -p "$PROJECT_ROOT/frontend"
-  # 保留已有的 basic_information.json 等数据文件
   rsync -a --delete \
     --exclude "basic_information.json" \
     "$SVC_FRONTEND/dist/" "$PROJECT_ROOT/frontend/"
 
-  success "前端部署完成 → $PROJECT_ROOT/frontend/"
-  info "Nginx 应将静态根目录指向 $PROJECT_ROOT/frontend/"
+  success "前端构建完成；主线访问请配置 Nginx root → $SVC_FRONTEND/dist（已同步副本至 frontend/）"
 }
 
 # ═══════════════════════════════════════════════════════════════

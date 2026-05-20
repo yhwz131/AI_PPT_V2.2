@@ -62,6 +62,8 @@ class VideoGenerationRequest(BaseModel):
     welcome_text: Optional[str] = "欢迎来到AI PPT 数字人讲解平台"
     topic_name: Optional[str] = "AI 知识讲堂"
     generate_subtitles: Optional[bool] = True
+    quality_mode: Optional[str] = "fast"
+    page_index: Optional[int] = 0
     sound_effects: Optional[SoundEffectsConfig] = Field(
         default_factory=lambda: SoundEffectsConfig(
             enabled=True,
@@ -111,3 +113,5 @@ class FileUploadResponse(BaseModel):
 
 # 全局任务状态存储
 tasks = {}
+# 已请求取消的任务 ID 集合
+cancelled_tasks = set()

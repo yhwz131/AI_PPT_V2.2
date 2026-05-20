@@ -1,4 +1,5 @@
 import os
+import shutil
 import tempfile
 import subprocess
 from pydub import AudioSegment
@@ -70,7 +71,12 @@ class AudioProcessor:
                     return main_audio
             
             # 加载背景音乐
+            generated_tmp = None
+            if music_file and music_file.startswith('/tmp/'):
+                generated_tmp = os.path.dirname(music_file)
             bg_music = AudioSegment.from_file(music_file)
+            if generated_tmp and os.path.isdir(generated_tmp):
+                shutil.rmtree(generated_tmp, ignore_errors=True)
             bg_music = bg_music - (20 * (1 - volume_ratio))
             
             # 循环背景音乐以匹配视频时长

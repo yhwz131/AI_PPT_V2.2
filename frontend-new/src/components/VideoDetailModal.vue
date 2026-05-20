@@ -64,14 +64,24 @@ defineEmits<{
 const videoRef = ref<HTMLVideoElement | null>(null)
 let hls: Hls | null = null
 
-function doDownload() {
+async function doDownload() {
   if (!props.video?.video_path) return
-  const a = document.createElement('a')
-  a.href = staticUrl(props.video.video_path)
-  a.download = props.video.video_path.split('/').pop() || 'video.mp4'
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
+  const url = staticUrl(props.video.video_path)
+  const name = props.video.video_path.split('/').pop() || 'video.mp4'
+  try {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = blobUrl
+    a.download = name
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(blobUrl)
+  } catch {
+    window.open(url, '_blank')
+  }
 }
 
 watch(() => [props.visible, props.video], () => {

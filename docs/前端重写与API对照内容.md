@@ -2,7 +2,7 @@
 
 本文说明 **`frontend-new/`**（Vue 3 + Vite + TypeScript）与后端 **`digital_human_interface/`**（FastAPI）之间的路由、接口与数据流对应关系，便于联调与排障。
 
-**部署**：生产环境通常将 **`frontend-new`** 执行 `vite build` 后的产物部署到仓库根目录 **`frontend/`**（与 Nginx 静态根一致）。另一目录 **`new_frontend/`** 为独立前端工程，**不是** 当前文档所述主线；二者勿混淆。详见 [文档索引.md](文档索引.md)。
+**部署（2026-04-25）**：生产环境 Nginx **`root` 指向 `frontend-new/dist/`**（`vite build` 直接输出目录），**无需**再手动将 `dist/*` 拷贝到 `frontend/`。`setup_env.sh` 构建后仍会 **rsync 副本到 `frontend/`**，便于旧配置或备份。仓库根 **`nginx-myweb.conf`** 为线上站点配置的备份。另一目录 **`new_frontend/`** 为独立前端工程，**不是** 当前文档所述主线。详见 [各服务配置与常见问题说明.md](各服务配置与常见问题说明.md) 第七节、[文档索引.md](文档索引.md)。
 
 ---
 

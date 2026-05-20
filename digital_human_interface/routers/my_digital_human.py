@@ -121,6 +121,10 @@ task_event_history: Dict[str, List[bytes]] = {}
 # 任务是否仍在运行
 task_running: Dict[str, bool] = {}
 
+# ========== 任务取消协作状态 ==========
+task_cancel_requested: set = set()
+task_inner_ids: Dict[str, str] = {}
+
 # ========== 任务状态存储 ==========
 task_status_store = {}
 TASK_EXPIRY_HOURS = 24
@@ -150,6 +154,8 @@ def cleanup_old_tasks():
         task_event_history.pop(task_id, None)
         task_event_queues.pop(task_id, None)
         task_running.pop(task_id, None)
+        task_cancel_requested.discard(task_id)
+        task_inner_ids.pop(task_id, None)
         print(f"已清理过期任务: {task_id}")
 
 
@@ -164,6 +170,10 @@ def update_task_status(task_id: str, status_updates: Dict[str, Any]):
 
     task_status_store[task_id].update(status_updates)
     task_status_store[task_id]["updated_at"] = time.time()
+
+
+def _is_task_cancelled(task_id: str) -> bool:
+    return task_id in task_cancel_requested
 
 
 def _cleanup_temp_files(data: Dict[str, Any]):
@@ -298,12 +308,25 @@ async def track_digital_human_generation(
             total_segments = len(texts)
             total_chars = sum(len(t) for t in texts)
             estimated_audio_duration = total_chars * 0.05
+            quality_mode = data.get("quality_mode", "fast")
 
             stage1_time = 1   # 文档解析
             stage2_time = 2   # 准备文件
             stage3_time = max(3, int(estimated_audio_duration * 0.3))
             stage4_time = 1   # 处理音频
-            stage5_time = max(10, int(estimated_audio_duration * 12))
+
+            if quality_mode == "hd":
+                # 基于实测数据的 HD 模式时间估算（v5 缓存架构）
+                # 中文 TTS 实际语速 ~0.4s/字，通用 estimated_audio_duration 偏低
+                real_audio_est = total_chars * 0.4
+                chars_per_seg = total_chars / max(1, total_segments)
+                frames_per_seg = int(chars_per_seg * 0.4 * 25)
+                unet_batches = max(1, frames_per_seg // 128)
+                per_seg = 5 + unet_batches * 10 + frames_per_seg * 0.13 + 15
+                stage5_time = max(120, int(per_seg * total_segments))
+            else:
+                stage5_time = max(10, int(estimated_audio_duration * 12))
+
             stage6_time = 1   # 视频合并
             stage7_time = 3   # 视频切片
 
@@ -362,6 +385,11 @@ async def track_digital_human_generation(
                 "error": error_msg,
                 "progress": 100
             })
+            return
+
+        if _is_task_cancelled(task_id):
+            yield SSEMessage.error("任务已被用户取消")
+            update_task_status(task_id, {"status": "cancelled", "message": "用户已取消任务"})
             return
 
         # 阶段2: 准备文件路径
@@ -450,6 +478,11 @@ async def track_digital_human_generation(
                 "error": error_msg,
                 "progress": 100
             })
+            return
+
+        if _is_task_cancelled(task_id):
+            yield SSEMessage.error("任务已被用户取消")
+            update_task_status(task_id, {"status": "cancelled", "message": "用户已取消任务"})
             return
 
         # 阶段3: 音频生成
@@ -545,6 +578,11 @@ async def track_digital_human_generation(
             })
             return
 
+        if _is_task_cancelled(task_id):
+            yield SSEMessage.error("任务已被用户取消")
+            update_task_status(task_id, {"status": "cancelled", "message": "用户已取消任务"})
+            return
+
         # 阶段4: 处理音频压缩包
         try:
             # 发送开始处理音频压缩包消息
@@ -627,6 +665,11 @@ async def track_digital_human_generation(
                 "error": error_msg,
                 "progress": 100
             })
+            return
+
+        if _is_task_cancelled(task_id):
+            yield SSEMessage.error("任务已被用户取消")
+            update_task_status(task_id, {"status": "cancelled", "message": "用户已取消任务"})
             return
 
         # 阶段5: 数字人视频生成
@@ -724,8 +767,15 @@ async def track_digital_human_generation(
             folder_path = get_file_path(os.path.join("static", "video", "temp", name_only))
             os.makedirs(folder_path, exist_ok=True)
 
-            async with httpx.AsyncClient(timeout=300.0) as client:
+            client_timeout = 900.0 if data.get("quality_mode") == "hd" else 300.0
+            async with httpx.AsyncClient(timeout=client_timeout) as client:
                 for i in range(num_videos):
+                    if _is_task_cancelled(task_id):
+                        print(f"[Cancel] 任务 {task_id} 已取消，跳过剩余视频")
+                        yield SSEMessage.error("任务已被用户取消")
+                        update_task_status(task_id, {"status": "cancelled", "message": "用户已取消任务"})
+                        return
+
                     video_start_progress = accumulated_progress
                     current_stage_progress = (i / num_videos) * 100 if num_videos > 0 else 0
 
@@ -771,6 +821,8 @@ async def track_digital_human_generation(
                             "topic_name": content_lis[i],
                             "animation_duration": 6.0,
                             "welcome_text": data.get("welcome_text", "欢迎来到AI PPT 数字人讲解平台"),
+                            "quality_mode": data.get("quality_mode", "fast"),
+                            "page_index": i,
                         }
                         submit_data["bgm_enabled"] = "false"
 
@@ -801,7 +853,19 @@ async def track_digital_human_generation(
                             task_id_inner = resp.json().get("task_id")
 
                             if task_id_inner:
-                                result_json = await poll_task_status_async(client, task_id_inner)
+                                task_inner_ids[task_id] = task_id_inner
+                                result_json = await poll_task_status_async(
+                                    client, task_id_inner,
+                                    quality_mode=data.get("quality_mode", "fast"),
+                                    parent_task_id=task_id,
+                                )
+                                task_inner_ids.pop(task_id, None)
+
+                                if result_json.get("cancelled"):
+                                    print(f"[Cancel] 任务 {task_id} 已取消，中止视频生成循环")
+                                    yield SSEMessage.error("任务已被用户取消")
+                                    update_task_status(task_id, {"status": "cancelled", "message": "用户已取消任务"})
+                                    return
 
                                 if (result_json.get("status_code") == 500 or
                                         result_json.get("message") == "视频生成失败" or
@@ -915,6 +979,11 @@ async def track_digital_human_generation(
                 total=total_videos,
                 current_stage_progress=100
             )
+
+            if _is_task_cancelled(task_id):
+                yield SSEMessage.error("任务已被用户取消")
+                update_task_status(task_id, {"status": "cancelled", "message": "用户已取消任务"})
+                return
 
             # 阶段6: 视频合并
             if completed_count > 0:  # 只要有成功生成的视频就尝试合并
@@ -1366,6 +1435,8 @@ async def create_generation_task(request: Request):
             await queue.put(end_evt)
         finally:
             task_running[task_id] = False
+            task_cancel_requested.discard(task_id)
+            task_inner_ids.pop(task_id, None)
             await queue.put(None)
 
     asyncio.create_task(_run_generation())
@@ -1428,6 +1499,39 @@ async def stream_generation_task(task_id: str, request: Request):
             "Access-Control-Allow-Origin": "*",
         }
     )
+
+
+# ========== 新增：任务取消接口 ==========
+@router.post("/tasks/{task_id}/cancel", summary="取消生成任务")
+async def cancel_generation_task(task_id: str):
+    """
+    取消正在执行的生成任务。
+    同时尝试转发取消请求到 5000 端口（Wav2Lip/MuseTalk 子任务）。
+    """
+    if task_id not in task_status_store and task_id not in task_running:
+        raise HTTPException(status_code=404, detail="任务不存在")
+
+    current_status = task_status_store.get(task_id, {}).get("status", "")
+    if current_status in ("completed", "failed", "cancelled"):
+        return {"code": 200, "message": f"任务已处于终态: {current_status}", "task_id": task_id}
+
+    task_cancel_requested.add(task_id)
+    update_task_status(task_id, {
+        "status": "cancelled",
+        "message": "用户已取消任务",
+    })
+    print(f"[Cancel] 9088 任务 {task_id} 已标记为取消")
+
+    inner_id = task_inner_ids.get(task_id)
+    if inner_id:
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.post(f"http://127.0.0.1:5000/cancel/{inner_id}")
+                print(f"[Cancel] 转发取消到 5000 子任务 {inner_id}: {resp.status_code}")
+        except Exception as e:
+            print(f"[Cancel] 转发取消到 5000 失败: {e}")
+
+    return {"code": 200, "message": "任务已标记为取消", "task_id": task_id}
 
 
 # ========== 新增：任务状态查询接口 ==========
@@ -1604,23 +1708,54 @@ def audio_generation(texts: List[str], audio_file_path: str,
 
 # ========== 轮询任务状态 ==========
 async def poll_task_status_async(client: httpx.AsyncClient, task_id: str,
-                                  max_attempts: int = 150, interval: float = 2):
+                                  max_attempts: int = 150, interval: float = 2,
+                                  quality_mode: str = "fast",
+                                  parent_task_id: str = ""):
     """
     异步轮询任务状态（使用复用的 httpx 客户端）
+    HD 模式允许更长的等待时间（最多 15 分钟）。
+    若 parent_task_id 已被取消，提前返回 cancelled 结果并转发取消到 5000。
     """
+    if quality_mode == "hd":
+        max_attempts = 450
+        interval = 2
     status_url = f"http://127.0.0.1:5000/status/{task_id}"
     for attempt in range(1, max_attempts + 1):
+        if parent_task_id and parent_task_id in task_cancel_requested:
+            print(f"[async poll] 父任务 {parent_task_id} 已取消，中止轮询子任务 {task_id}")
+            try:
+                await client.post(f"http://127.0.0.1:5000/cancel/{task_id}")
+            except Exception:
+                pass
+            return {"error": "用户取消", "status_code": 499, "message": "任务已被用户取消", "cancelled": True}
         try:
             status_resp = await client.get(status_url)
             if status_resp.status_code == 200:
                 return status_resp.json()
             elif status_resp.status_code == 500:
                 return status_resp.json()
+            elif status_resp.status_code == 404:
+                print(f"[async poll] 任务 {task_id} 不存在 (404)，停止轮询")
+                return {"error": "任务不存在", "status_code": 500, "message": "视频生成失败", "task_id": task_id}
         except Exception as e:
             print(f"[async poll] attempt {attempt} error: {e}")
         if attempt < max_attempts:
             await asyncio.sleep(interval)
-    return {"error": "轮询超时", "task_id": task_id}
+    return {"error": "轮询超时", "status_code": 500, "message": "视频生成失败", "task_id": task_id}
+
+
+async def _trigger_musetalk_preprocess(video_path: str, name: str = ""):
+    """后台异步调用 5000 端口的 MuseTalk 预处理接口"""
+    try:
+        async with httpx.AsyncClient(timeout=600.0) as client:
+            resp = await client.post(
+                "http://127.0.0.1:5000/musetalk/preprocess",
+                data={"face_path": video_path},
+            )
+            result = resp.json()
+            print(f"[MuseTalk Preprocess] {name}: {result.get('status')} - {result.get('message', '')}")
+    except Exception as e:
+        print(f"[MuseTalk Preprocess] {name} 预处理请求失败: {e}")
 
 
 # ========== 辅助函数 ==========
@@ -1957,6 +2092,13 @@ async def upload_digital_human(
 
         except Exception as e:
             print(f"❌ 操作失败: {e}")
+
+        # 异步触发 MuseTalk 预处理缓存（后台，用户无需等待）
+        try:
+            video_abs = str(settings.upload_video_folder_absolute / video_filename)
+            asyncio.create_task(_trigger_musetalk_preprocess(video_abs, name))
+        except Exception as e:
+            print(f"[MuseTalk Preprocess] 触发预处理失败（不影响上传）: {e}")
 
         return JSONResponse(
             status_code=200,

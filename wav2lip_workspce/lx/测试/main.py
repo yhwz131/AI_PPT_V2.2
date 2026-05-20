@@ -32,11 +32,50 @@ def _preload_whisper():
     except Exception as e:
         print(f"Whisper preload failed (will load on first use): {e}")
 
+
+def _preload_musetalk():
+    """启动时预加载 MuseTalk 模型（VAE/UNet/PE/Whisper/FaceParsing），消除首次 HD 生成的 ~30s 冷启动"""
+    try:
+        from api.routes import generator
+        generator._init_musetalk()
+        print("MuseTalk model preloaded successfully")
+    except Exception as e:
+        print(f"MuseTalk preload failed (will load on first use): {e}")
+
+
+def _check_environment():
+    """启动时验证运行环境，提前暴露 conda 环境错配问题"""
+    import platform
+    py_ver = platform.python_version()
+    py_exec = sys.executable
+    conda_env = os.environ.get("CONDA_DEFAULT_ENV") or os.environ.get("CONDA_PREFIX", "unknown")
+    print(f"[ENV] Python {py_ver}  |  {py_exec}  |  conda: {conda_env}")
+
+    if sys.version_info < (3, 9):
+        print(f"[ENV] ⚠️ Python {py_ver} < 3.9，部分功能（cancel_futures）不可用，建议使用 MuseTalk 环境（Python 3.10）")
+
+    critical = {"mmpose": False, "einops": False, "diffusers": False}
+    for pkg in critical:
+        try:
+            __import__(pkg)
+            critical[pkg] = True
+        except ImportError:
+            pass
+
+    missing = [k for k, v in critical.items() if not v]
+    if missing:
+        print(f"[ENV] ⚠️ 关键依赖缺失: {', '.join(missing)} —— HD 模式（MuseTalk）将不可用，请确认在 MuseTalk conda 环境中运行")
+    else:
+        print("[ENV] ✅ 关键依赖检查通过（mmpose, einops, diffusers）")
+
+
 def main():
     print("🚀🚀🚀🚀 启动简体中文数字人视频生成器 FastAPI 服务...")
+    _check_environment()
     
     _preload_wav2lip()
     _preload_whisper()
+    _preload_musetalk()
     
     # 获取配置
     host_ip = config.host_ip

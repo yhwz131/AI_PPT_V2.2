@@ -31,10 +31,10 @@ mkdir -p "$PID_DIR" "$LOG_DIR"
 declare -a SERVICES=(
     "paddleocr|ppocrvl|0|$PROJECT_ROOT/paddleocr|python api_paddleocr_vl_ai_ppt.py|8802|paddleocr.pid"
     "tts|index-tts-vllm|1|$PROJECT_ROOT/index-tts-vllm|python server/tts_server_v2_batch.py --gpu_memory_utilization 0.3 --qwenemo_gpu_memory_utilization 0.2 --is_fp16|6006|tts.pid"
-    "wav2lip|wav2lip_fixed|0|$PROJECT_ROOT/wav2lip_workspce/lx/测试|python main.py|5000|wav2lip.pid"
+    "wav2lip|MuseTalk|0|$PROJECT_ROOT/wav2lip_workspce/lx/测试|python main.py|5000|wav2lip.pid"
     "digital|digital||$PROJECT_ROOT/digital_human_interface|python main.py|9088|digital.pid"
     # 前端由 Nginx 提供（静态文件），无需额外进程
-    # 部署新版：cd frontend-new && node_modules/.bin/vite build && cp -r dist/* ../frontend/
+    # 部署新版：cd frontend-new && npm run build；Nginx root 指向 frontend-new/dist（见仓库 nginx-myweb.conf）
 )
 
 # ============ 颜色定义 ============
@@ -179,6 +179,7 @@ start_service() {
 
         if [ -n "$S_CONDA" ]; then
             activate_conda "$S_CONDA" || exit 1
+            log_info "[$S_NAME] Python: $(which python) ($(python --version 2>&1))"
         fi
 
         mkdir -p "$LOG_DIR"

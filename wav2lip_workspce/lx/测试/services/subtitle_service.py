@@ -436,10 +436,11 @@ Dialogue: 0,0:00:00.00,0:00:05.00,TVStyle,,0,0,0,,{{\\k100}}{{\\c&HFFFFFF&}}欢�
             return False
 
     def _optimize_chinese_punctuation(self, text):
-        """优化中文标点符号"""
+        """优化中文标点符号（智能替换：保留数字小数点和英文缩写中的点）"""
         import re
         text = re.sub(r'\s*,\s*', '，', text)
-        text = re.sub(r'\s*\.\s*', '。', text)
+        # 仅替换中文语境中的句号：前后都不是数字/英文字母的 . 才转为 。
+        text = re.sub(r'(?<![0-9a-zA-Z])\.\s*(?![0-9a-zA-Z])', '。', text)
         text = re.sub(r'\s*\?\s*', '？', text)
         text = re.sub(r'\s*!\s*', '！', text)
         text = re.sub(r'\s*;\s*', '；', text)

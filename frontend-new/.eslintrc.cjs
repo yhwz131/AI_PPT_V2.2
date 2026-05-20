@@ -1,58 +1,54 @@
 module.exports = {
-  root: true,
   env: {
     browser: true,
-    node: true
+    node: true,
   },
   extends: [
     'eslint:recommended',
     '@vue/typescript/recommended',
     'plugin:vue/vue3-recommended',
-    'eslint-config-prettier'
+    'eslint-config-prettier',
   ],
   parserOptions: {
     ecmaVersion: 2020,
-    parser: '@typescript-eslint/parser'
+    parser: '@typescript-eslint/parser',
   },
-  plugins: [
-    '@typescript-eslint',
-    'vue'
-  ],
+  plugins: ['@typescript-eslint', 'vue'],
   rules: {
     // 命名规范
     '@typescript-eslint/naming-convention': [
       'error',
       {
         selector: 'interface',
-        format: ['PascalCase']
+        format: ['PascalCase'],
       },
       {
         selector: 'typeAlias',
-        format: ['PascalCase']
+        format: ['PascalCase'],
       },
       {
         selector: 'class',
-        format: ['PascalCase']
+        format: ['PascalCase'],
       },
       {
         selector: 'enum',
-        format: ['PascalCase']
+        format: ['PascalCase'],
       },
       {
         selector: 'variable',
         format: ['camelCase', 'UPPER_CASE'],
-        leadingUnderscore: 'allow'
+        leadingUnderscore: 'allow',
       },
       {
         selector: 'function',
-        format: ['camelCase']
-      }
+        format: ['camelCase'],
+      },
     ],
     // 代码风格
-    'indent': ['error', 2, { 'SwitchCase': 1 }],
+    indent: ['error', 2, { SwitchCase: 1 }],
     'linebreak-style': ['error', 'unix'],
-    'quotes': ['error', 'single'],
-    'semi': ['error', 'always'],
+    quotes: ['error', 'single'],
+    semi: ['error', 'always'],
     'no-trailing-spaces': 'error',
     'object-curly-spacing': ['error', 'always'],
     'array-bracket-spacing': ['error', 'never'],
@@ -68,9 +64,9 @@ module.exports = {
         html: {
           void: 'always',
           normal: 'always',
-          component: 'always'
-        }
-      }
+          component: 'always',
+        },
+      },
     ],
     'vue/order-in-components': [
       'error',
@@ -84,9 +80,9 @@ module.exports = {
           'computed',
           'watch',
           'lifecycle',
-          'methods'
-        ]
-      }
-    ]
-  }
+          'methods',
+        ],
+      },
+    ],
+  },
 };

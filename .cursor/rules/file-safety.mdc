@@ -1,0 +1,23 @@
+---
+description: 禁止 Cursor Agent 删除或移动项目关键文件，防止工作区同步误删
+alwaysApply: true
+---
+
+# 文件安全规则
+
+## 绝对禁止删除的目录和文件
+
+以下路径为项目核心代码，**禁止执行 `rm`、`git rm`、`os.remove`、`shutil.rmtree` 或任何形式的删除/移动操作**：
+
+- `frontend-new/src/**` — 前端源码
+- `wav2lip_workspce/lx/测试/services/**` — 后端核心服务脚本
+- `wav2lip_workspce/lx/测试/api/**` — 后端 API 路由
+- `digital_human_interface/routers/**` — 网关路由
+- `digital_human_interface/services/**` — 网关服务
+
+## 操作守则
+
+1. **只编辑，不删除**：修改文件内容时使用 StrReplace 或 Write，绝不删除源文件
+2. **不移动文件**：不使用 `mv`、`git mv` 改变上述目录中文件的位置
+3. **改完立即提醒提交**：完成重要修改后主动提醒用户 `git add && git commit`
+4. **恢复优先**：如发现文件丢失，首先用 `git checkout HEAD -- <path>` 恢复

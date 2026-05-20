@@ -1,79 +1,142 @@
 {
     "data": [
         {
-            "file_name": "测试ppt.pptx",
+            "file_name": "魅力云南：自然、文化与发展的交响诗.pptx",
             "content_text": [
-                "大家好，欢迎参加本次分享。今天我们将深入解析AI数字人项目，从核心概念到具体实现，为您呈现完整的全流程解析。本次报告时间为2026年1月1日。",
-                "以上就是本次关于AI数字人项目的全部内容。感谢各位的聆听与参与，期待未来能有更多交流。谢谢大家！"
+                "各位好，今天我将带大家走进‘魅力云南’。云南，这片位于中国西南边陲的土地，不仅仅是一个地理名称，更是一首由自然、文化与现代发展共同谱写的交响诗。它以其无与伦比的生物多样性、深厚的历史积淀和绚丽多彩的民族文化而闻名于世。本次分享，我们将从自然禀赋、历史文脉、民族文化、现代经济以及未来蓝图五个维度，深入剖析云南的独特魅力与战略价值，揭示其如何在中国乃至全球格局中扮演着日益重要的角色。",
+                "在正式开始之前，我们先来概览本次分享的完整框架。整个内容将分为五个核心章节。第一章，我们将聚焦于云南‘得天独厚的自然禀赋’，详细解读其复杂的地形地貌、独特的气候特征、丰富的自然资源以及星罗棋布的江河湖泊。第二章，我们将回溯‘源远流长的历史文脉’，从远古文明、古滇王国，到作为丝路枢纽的辉煌，直至近代的抗战回响。第三章，我们将沉浸于‘绚丽多姿的民族文化’，系统介绍其民族构成、独特的风情民俗、珍贵的非物质文化遗产以及多元文化融合的生动实践。第四章，我们将分析‘蓬勃发展的现代经济’，涵盖经济总体概况、特色高原农业、新兴工业体系以及作为支柱产业的旅游业。最后，第五章，我们将展望云南‘面向未来的宏伟蓝图’，重点解读其‘3815’战略发展目标、‘三个定位’以及未来的发展愿景。",
+                "现在，让我们进入第一章：云南得天独厚的自然禀赋。首先，其地形特征可以用‘九分山和原，一分坝和水’来概括。全省约94%的面积是山地和高原，地势从西北向东南呈阶梯状急剧下降，形成了极其复杂的地理格局。这种地形的极致对比，首先体现在海拔上。最高点是位于滇藏交界处的梅里雪山主峰——卡瓦格博峰，海拔高达6740米，是云南乃至整个横断山脉的雄伟天际线。与之形成鲜明对比的是最低点，位于河口县南溪河与红河交汇处，海拔仅76.4米。这一高一低，垂直高差超过6600米，生动诠释了云南地势的剧烈变化。正是这种极致的立体地貌，孕育了云南无与伦比的自然奇观：这里有终年积雪的雪山冰川，有举世闻名的深切峡谷如虎跳峡，有奇特的喀斯特地貌代表石林，还有色彩斑斓的元谋土林。多种地貌交织并存，共同构成了云南壮丽而极致的自然风光画卷，也为生物多样性和独特气候的形成奠定了基础。",
+                "接下来，我们穿越时空，探索云南源远流长的历史文脉。本章重点聚焦于其作为重要枢纽的近代篇章。首先，在明清时期，云南是‘茶马古道’的核心商贸枢纽。庞大的马帮队伍驮着茶叶、盐巴、布匹等物资，穿越险峻的横断山脉，构建了一张连接四川、云南、西藏，并延伸至南亚、东南亚的庞大贸易与文化网络，促进了区域间的经济文化交流。到了近代抗战时期，云南的战略地位更加凸显。一方面，为打破日军封锁，云南各族人民以血肉之躯，在崇山峻岭中开辟了‘滇缅公路’，这条被誉为‘抗战生命线’的国际通道，成为当时中国接受国际援助最重要的‘输血管’。另一方面，在文化教育领域，国立北京大学、清华大学、私立南开大学内迁至昆明，合并组建了‘国立西南联合大学’。在极端艰苦的条件下，联大师生秉持刚毅坚卓的校训，坚持教学与科研，为国家保存并培养了大量的顶尖人才，赓续了中华文化的文脉，创造了世界教育史上的奇迹。这两段历史，共同铸就了云南坚韧、开放、担当的近代精神回响。",
+                "现在，让我们沉浸到云南最绚丽多彩的篇章——民族文化。这里生活着25个世居少数民族，每个民族都拥有独特的智慧结晶。我们以哈尼族和纳西族为例进行深入分析。首先，哈尼族堪称‘大地的雕刻家’。他们世代居住在红河哈尼族彝族自治州的哀牢山区，创造了举世闻名的‘梯田农耕’文明。经过千年的开垦与维护，他们将山坡雕刻成层叠错落、线条优美的梯田画卷，实现了水资源高效利用、水土保持与粮食生产的完美平衡。其中，元阳梯田已被列入世界文化遗产，是顺应自然、永续发展的生态农业典范。其传统民居‘蘑菇房’，屋顶形如蘑菇，采用茅草覆盖，下层养畜、上层住人，是适应山区多雨潮湿气候的建筑智慧。另一方面，纳西族创造了灿烂的东巴文化。其‘东巴象形文字’是世界上现存唯一仍在使用的象形文字，是研究文字起源与演变的活化石。‘纳西古乐’则融合了中原唐宋时期的词牌曲牌与本土音乐元素，被誉为‘中国音乐的活化石’。此外，源于云南的‘普洱茶制作技艺’也已被列为国家级非物质文化遗产，其复杂的晒青、发酵工艺体现了深厚的茶文化内涵。这些非遗瑰宝，共同构成了云南民族文化多元融合、生生不息的生动图景。",
+                "在深厚的自然与人文底蕴基础上，云南的现代经济正蓬勃发展。我们来看一组2025年的核心经济数据。首先，全省地区生产总值，即GDP，达到了32765.78亿元人民币，比上年增长了4.1%，这表明云南经济在复杂环境下保持了稳健运行的态势。其次，人均地区生产总值为70472元，反映出居民收入和生活水平实现了稳步提升。最关键的数据在于产业结构：三次产业的结构比例优化为13.2：32.0：54.8。这意味着，第一产业（农业）占比13.2%，第二产业（工业）占比32.0%，而第三产业（服务业）占比已达到54.8%，超过了经济总量的一半。结合图表中2021至2025年地区生产总值的增长趋势来看，数据清晰地表明，以旅游业、现代物流、金融、信息服务等为代表的第三产业，已经成为拉动全省经济增长的核心动力。云南的产业结构正在持续向更高质量、更可持续的‘三二一’模式，也就是服务业为主导、工业为支撑、农业为基础的现代化产业体系演进，这为经济的长远健康发展奠定了坚实基础。",
+                "立足当下，展望未来，云南已绘制出面向未来的宏伟蓝图，其核心可概括为‘三个定位’。第一，是努力成为全国‘生态文明建设排头兵’。这意味着云南将始终坚持生态优先、绿色发展的理念，像保护眼睛一样保护生态环境，守护好这里的绿水青山，从而筑牢国家西南生态安全屏障。第二，是建设成为‘面向南亚东南亚的辐射中心’。云南将充分发挥其独特的区位优势，主动服务和融入国家‘一带一路’倡议，深化与周边国家的互联互通与经贸合作，努力成为中国与南亚东南亚国家交流合作的核心前沿和重要枢纽。第三，是打造‘民族团结进步示范区’。云南将持续深入开展民族团结进步创建工作，促进境内各民族广泛交往、全面交流、深度交融，不断铸牢中华民族共同体意识。最后，我们用一個公式来总结云南的发展逻辑：发展成果等于生态保护、对外开放、民族团结、经济增长等多个变量的函数。这表明，云南的未来发展是一个多维度、多因素协同作用的系统工程，必须统筹兼顾生态、开放、团结、发展等各项目标，实现协同推进，才能最终达成全面、协调、可持续的高质量发展愿景。",
+                "以上就是我对‘魅力云南’从自然到人文、从历史到经济、从现状到未来的全面解读。云南的魅力，在于其自然的鬼斧神工，在于其历史的波澜壮阔，在于其文化的绚烂多姿，更在于其面向未来的无限潜力。它是一片充满机遇、正在加速发展的热土。感谢各位的耐心聆听，我们期待能与在座的各位携手，共同探索云南的机遇，共创更加美好的未来。谢谢大家！"
             ],
             "img_lis": [
-                "/static/file/images/181b4cff-7042-4e13-a7bb-edf7007f599b/slide_001.png",
-                "/static/file/images/181b4cff-7042-4e13-a7bb-edf7007f599b/slide_002.png"
+                "/static/file/images/9d443f1a-03bd-47e1-9b21-2b5640ad7da5/slide_001.png",
+                "/static/file/images/9d443f1a-03bd-47e1-9b21-2b5640ad7da5/slide_002.png",
+                "/static/file/images/9d443f1a-03bd-47e1-9b21-2b5640ad7da5/slide_003.png",
+                "/static/file/images/9d443f1a-03bd-47e1-9b21-2b5640ad7da5/slide_004.png",
+                "/static/file/images/9d443f1a-03bd-47e1-9b21-2b5640ad7da5/slide_005.png",
+                "/static/file/images/9d443f1a-03bd-47e1-9b21-2b5640ad7da5/slide_006.png",
+                "/static/file/images/9d443f1a-03bd-47e1-9b21-2b5640ad7da5/slide_007.png",
+                "/static/file/images/9d443f1a-03bd-47e1-9b21-2b5640ad7da5/slide_008.png"
             ],
-            "pdf_path": "static/file/pdf/181b4cff-7042-4e13-a7bb-edf7007f599b.pdf",
-            "video_path": "/static/video/mergers/测试ppt.pptx.mp4",
-            "m3u8_url": "/static/video/hls/181b4cff-7042-4e13-a7bb-edf7007f599b/playlist.m3u8",
-            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/181b4cff-7042-4e13-a7bb-edf7007f599b"
+            "pdf_path": "static/file/pdf/9d443f1a-03bd-47e1-9b21-2b5640ad7da5.pdf",
+            "video_path": "/static/video/mergers/魅力云南：自然、文化与发展的交响诗.pptx.mp4",
+            "m3u8_url": "/static/video/hls/9d443f1a-03bd-47e1-9b21-2b5640ad7da5/playlist.m3u8",
+            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/9d443f1a-03bd-47e1-9b21-2b5640ad7da5"
         },
         {
             "file_name": "测试ppt.pptx",
             "content_text": [
-                "大家好，欢迎来到本次项目讲解。本次报告的主题是‘AI 数字人项目讲解’，我们将从概念到实现，为您系统性地解析整个项目的全流程。报告预计于2026年1月1日进行，届时将详细阐述项目的各个关键环节与核心成果。现在，让我们正式开始。",
-                "以上就是本次关于AI数字人项目从概念到实现的全流程解析。我们已经详细介绍了项目的核心内容与关键步骤。感谢您的专注聆听与宝贵时间。如果您有任何疑问或需要进一步探讨，欢迎随时提出。再次感谢大家，本次报告到此结束。"
+                "今天，我们带来AI数字人项目从概念到实现的全流程解析。报告时间为2026年1月1日，一起开启数字人技术之旅。"
             ],
             "img_lis": [
-                "/static/file/images/c0b74620-cac4-450e-8e05-2b684696dfb5/slide_001.png",
-                "/static/file/images/c0b74620-cac4-450e-8e05-2b684696dfb5/slide_002.png"
+                "/static/file/images/9d34e042-e4db-4b6f-ac6e-cd8a856b1110/slide_001.png"
             ],
-            "pdf_path": "static/file/pdf/c0b74620-cac4-450e-8e05-2b684696dfb5.pdf",
+            "pdf_path": "static/file/pdf/9d34e042-e4db-4b6f-ac6e-cd8a856b1110.pdf",
             "video_path": "/static/video/mergers/测试ppt.pptx.mp4",
-            "m3u8_url": "/static/video/hls/c0b74620-cac4-450e-8e05-2b684696dfb5/playlist.m3u8",
-            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/c0b74620-cac4-450e-8e05-2b684696dfb5"
+            "m3u8_url": "/static/video/hls/9d34e042-e4db-4b6f-ac6e-cd8a856b1110/playlist.m3u8",
+            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/9d34e042-e4db-4b6f-ac6e-cd8a856b1110"
         },
         {
             "file_name": "测试ppt.pptx",
             "content_text": [
-                "大家好，欢迎参加本次分享。今天，我们将全面解析AI数字人项目，从核心概念到具体实现，为您展示完整的全流程。本次报告时间为2026年1月1日。",
-                "以上就是本次关于AI数字人项目的全部分享内容。感谢各位的聆听与关注，期待未来能有更多交流。谢谢大家！"
+                "欢迎来到AI数字人项目讲解。今天，我们将从概念到实现，全程解析。报告时间是2026年1月1日。"
             ],
             "img_lis": [
-                "/static/file/images/c32a313d-730e-44f5-b227-634f79544b64/slide_001.png",
-                "/static/file/images/c32a313d-730e-44f5-b227-634f79544b64/slide_002.png"
+                "/static/file/images/5bef577b-be5b-4b58-aa5a-299292f3dc9d/slide_001.png"
             ],
-            "pdf_path": "static/file/pdf/c32a313d-730e-44f5-b227-634f79544b64.pdf",
+            "pdf_path": "static/file/pdf/5bef577b-be5b-4b58-aa5a-299292f3dc9d.pdf",
             "video_path": "/static/video/mergers/测试ppt.pptx.mp4",
-            "m3u8_url": "/static/video/hls/c32a313d-730e-44f5-b227-634f79544b64/playlist.m3u8",
-            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/c32a313d-730e-44f5-b227-634f79544b64"
+            "m3u8_url": "/static/video/hls/5bef577b-be5b-4b58-aa5a-299292f3dc9d/playlist.m3u8",
+            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/5bef577b-be5b-4b58-aa5a-299292f3dc9d"
+        },
+        {
+            "file_name": "AI数字人技术全景-修改版-1.pptx",
+            "content_text": [
+                "大家好，今天分享AI数字人技术全景，包含市场分析、技术方案与应用场景。2026年4月，让我们共同探索数字人技术的无限可能。",
+                "数字人市场正迈向千亿规模。2024年中国41.2亿元，全球737.4亿美元。预计2029年中国达250.5亿，全球1552.9亿美元。中国市场增速领跑全球，2025至2029年复合增长率超45%。",
+                "图表展示市场增长趋势。2024年起点，中国41.2亿元，全球737.4亿美元。2029年目标，中国250.5亿元，全球1552.9亿美元。曲线显示持续上扬，机遇巨大。",
+                "感谢观看，让AI为内容创作赋能。联系电话400-XXX-XXXX，官方网站www.example.com。期待与您合作。"
+            ],
+            "img_lis": [
+                "/static/file/images/da35f302-cc72-4a30-a11e-adfc11194325/slide_001.png",
+                "/static/file/images/da35f302-cc72-4a30-a11e-adfc11194325/slide_002.png",
+                "/static/file/images/da35f302-cc72-4a30-a11e-adfc11194325/slide_003.png",
+                "/static/file/images/da35f302-cc72-4a30-a11e-adfc11194325/slide_004.png"
+            ],
+            "pdf_path": "static/file/pdf/da35f302-cc72-4a30-a11e-adfc11194325.pdf",
+            "video_path": "/static/video/mergers/AI数字人技术全景-修改版-1.pptx.mp4",
+            "m3u8_url": "/static/video/hls/da35f302-cc72-4a30-a11e-adfc11194325/playlist.m3u8",
+            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/da35f302-cc72-4a30-a11e-adfc11194325"
+        },
+        {
+            "file_name": "AI数字人技术全景-修改版-1.pptx",
+            "content_text": [
+                "各位好，今天我们将深入探讨AI数字人技术的全景。这份报告涵盖了市场分析、技术方案以及应用场景三大核心板块。我们正处于数字化转型的关键时期，AI数字人作为人工智能与计算机图形学深度融合的产物，正在重塑人机交互的边界。接下来，我将带您从宏观市场趋势、核心技术路径到具体落地场景，系统性地理解这一前沿领域的现状与未来。让我们首先从市场规模切入。",
+                "首先看市场规模。根据权威数据，2024年中国数字人市场规模已达41.2亿元人民币，全球市场则为737.4亿美元。到2025年，中国市场规模预计增长至59.3亿元，全球达到958.6亿美元，同比增长率高达44%。值得注意的是，2026年全球市场预计突破1246.2亿美元，中国市场达到85.2亿元，增速持续领跑。放眼2029年，中国市场规模有望冲击250.5亿元，全球达到1552.9亿美元。从2025到2029年，中国市场复合年增长率预计超过45%，显著高于全球平均水平。这一数据充分表明，中国正成为全球数字人产业的核心增长引擎。",
+                "接下来通过趋势图进一步分析。图表显示，从2024年到2029年，中国市场规模从41.2亿元攀升至250.5亿元，全球市场从737.4亿美元增长至1552.9亿美元。中国市场的增长曲线更为陡峭，反映了政策支持、技术突破以及丰富应用场景的叠加效应。特别在2024至2026年间，全球市场几乎每年保持约40%以上的同比增长，而中国市场的增速更为激进。这一趋势背后，是AI生成算法、实时渲染技术以及5G网络的成熟。图表下方的说明也印证了，数字人已从概念验证进入规模化商业落地阶段。接下来，我们具体看看这些技术方案如何支撑市场增长。",
+                "最后，感谢各位的聆听。今天的分享旨在揭示AI数字人技术如何为内容创作赋能。无论是虚拟主播、智能客服，还是数字孪生与教育培训，数字人都正在释放巨大的商业价值。如果您希望进一步了解技术落地或寻求合作，欢迎通过屏幕下方的联系方式与我们沟通：联系电话400-XXX-XXXX，或访问官方网站www.example.com。让我们携手，共同探索AI数字人技术带来的无限可能。谢谢大家！"
+            ],
+            "img_lis": [
+                "/static/file/images/e79ef1fb-5135-468a-9e15-19e7cdf45cf8/slide_001.png",
+                "/static/file/images/e79ef1fb-5135-468a-9e15-19e7cdf45cf8/slide_002.png",
+                "/static/file/images/e79ef1fb-5135-468a-9e15-19e7cdf45cf8/slide_003.png",
+                "/static/file/images/e79ef1fb-5135-468a-9e15-19e7cdf45cf8/slide_004.png"
+            ],
+            "pdf_path": "static/file/pdf/e79ef1fb-5135-468a-9e15-19e7cdf45cf8.pdf",
+            "video_path": "/static/video/mergers/AI数字人技术全景-修改版-1.pptx.mp4",
+            "m3u8_url": "/static/video/hls/e79ef1fb-5135-468a-9e15-19e7cdf45cf8/playlist.m3u8",
+            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/e79ef1fb-5135-468a-9e15-19e7cdf45cf8"
         },
         {
             "file_name": "测试ppt.pptx",
             "content_text": [
-                "大家好，今天我将为大家全面解析AI数字人项目。我们将从概念出发，深入探讨其实现的全流程。本次报告时间是2026年1月1日。",
-                "以上就是本次AI数字人项目的全部分享。感谢各位的聆听与关注，期待未来与大家有更多的交流。谢谢！"
+                "欢迎来到AI数字人项目讲解，我们从概念到实现全流程解析。报告时间定于2026年1月1日，今天将带您深入了解数字人的核心技术。"
             ],
             "img_lis": [
-                "/static/file/images/e46f7500-1f70-4efd-9481-06404ddb6c89/slide_001.png",
-                "/static/file/images/e46f7500-1f70-4efd-9481-06404ddb6c89/slide_002.png"
+                "/static/file/images/055fd523-fab6-4df3-8bf1-5789abbca52c/slide_001.png"
             ],
-            "pdf_path": "static/file/pdf/e46f7500-1f70-4efd-9481-06404ddb6c89.pdf",
+            "pdf_path": "static/file/pdf/055fd523-fab6-4df3-8bf1-5789abbca52c.pdf",
             "video_path": "/static/video/mergers/测试ppt.pptx.mp4",
-            "m3u8_url": "/static/video/hls/e46f7500-1f70-4efd-9481-06404ddb6c89/playlist.m3u8",
-            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/e46f7500-1f70-4efd-9481-06404ddb6c89"
+            "m3u8_url": "/static/video/hls/055fd523-fab6-4df3-8bf1-5789abbca52c/playlist.m3u8",
+            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/055fd523-fab6-4df3-8bf1-5789abbca52c"
+        },
+        {
+            "file_name": "AI数字人技术全景-修改版-1.pptx",
+            "content_text": [
+                "欢迎来到AI数字人技术全景。今天，我们将从市场分析、技术方案到应用场景，全方位解析数字人产业。",
+                "数字人市场正高速增长。2024年中国41.2亿元，全球737.4亿美元。2026年中国85.2亿，全球1246.2亿，同比增长44%。预计2029年中国达250.5亿，全球1552.9亿。中国市场增速领跑全球，2025至2029年复合增长率超45%。",
+                "看增长趋势：2024年起点中国41.2亿，全球737.4亿。到2029年目标中国250.5亿，全球1552.9亿。图表清晰展示了从2024到2029年的持续攀升。",
+                "感谢观看，让AI为内容创作赋能。如有需求，请联系400-XXX-XXXX，或访问官网www.example.com。"
+            ],
+            "img_lis": [
+                "/static/file/images/d1502869-88de-4788-b8ec-2b8f93f98228/slide_001.png",
+                "/static/file/images/d1502869-88de-4788-b8ec-2b8f93f98228/slide_002.png",
+                "/static/file/images/d1502869-88de-4788-b8ec-2b8f93f98228/slide_003.png",
+                "/static/file/images/d1502869-88de-4788-b8ec-2b8f93f98228/slide_004.png"
+            ],
+            "pdf_path": "static/file/pdf/d1502869-88de-4788-b8ec-2b8f93f98228.pdf",
+            "video_path": "/static/video/mergers/AI数字人技术全景-修改版-1.pptx.mp4",
+            "m3u8_url": "/static/video/hls/d1502869-88de-4788-b8ec-2b8f93f98228/playlist.m3u8",
+            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/d1502869-88de-4788-b8ec-2b8f93f98228"
         },
         {
             "file_name": "测试ppt.pptx",
             "content_text": [
-                "大家好，欢迎来到本次分享。今天我们将深入解析AI数字人项目，从核心概念到具体实现，为您呈现一个完整的全流程解析。本次报告时间为2026年1月1日。",
-                "以上就是本次关于AI数字人项目的全部讲解内容。感谢各位的聆听与关注，期待未来与您有更多的交流与合作。谢谢大家！"
+                "今天我们讲解AI数字人项目，从概念到实现全流程解析。报告时间为2026年1月1日。",
+                "感谢各位的聆听，本次分享到此结束。"
             ],
             "img_lis": [
-                "/static/file/images/65b4b0cf-52ee-4b14-b6b5-a0d08d965b7d/slide_001.png",
-                "/static/file/images/65b4b0cf-52ee-4b14-b6b5-a0d08d965b7d/slide_002.png"
+                "/static/file/images/b3019068-031c-4a73-9d6d-0ffb5ec9261c/slide_001.png",
+                "/static/file/images/b3019068-031c-4a73-9d6d-0ffb5ec9261c/slide_002.png"
             ],
-            "pdf_path": "static/file/pdf/65b4b0cf-52ee-4b14-b6b5-a0d08d965b7d.pdf",
+            "pdf_path": "static/file/pdf/b3019068-031c-4a73-9d6d-0ffb5ec9261c.pdf",
             "video_path": "/static/video/mergers/测试ppt.pptx.mp4",
-            "m3u8_url": "/static/video/hls/65b4b0cf-52ee-4b14-b6b5-a0d08d965b7d/playlist.m3u8",
-            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/65b4b0cf-52ee-4b14-b6b5-a0d08d965b7d"
+            "m3u8_url": "/static/video/hls/b3019068-031c-4a73-9d6d-0ffb5ec9261c/playlist.m3u8",
+            "output_dir": "/home/ubuntu/workspace/PPTTalK/digital_human_interface/static/video/hls/b3019068-031c-4a73-9d6d-0ffb5ec9261c"
         }
     ]
 }

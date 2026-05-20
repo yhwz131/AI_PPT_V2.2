@@ -30,6 +30,7 @@ export interface GenerationRequest {
   emo_control_method?: string
   emo_vec?: string
   emo_text?: string
+  quality_mode?: string
 }
 
 export async function fetchDigitalHumans(type: 'built-in' | 'custom'): Promise<DigitalHuman[]> {
@@ -76,6 +77,17 @@ export async function checkTaskExists(taskId: string): Promise<TaskCheck> {
     return { exists: 'error' }
   } catch {
     return { exists: 'error' }
+  }
+}
+
+export async function cancelTask(taskId: string): Promise<void> {
+  const base = import.meta.env.VITE_API_BASE || ''
+  try {
+    await fetch(`${base}/my_digital_human/tasks/${encodeURIComponent(taskId)}/cancel`, {
+      method: 'POST',
+    })
+  } catch {
+    // Best-effort: even if this fails, the UI should still disconnect SSE
   }
 }
 

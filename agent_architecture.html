@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PaddleOCR-VL 服务架构</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0A0E17 0%, #1A1F35 50%, #2D1F4E 100%);
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            padding: 20px 30px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #00D4FF 0%, #4A7CFF 100%);
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.25;
+            top: -100px;
+            right: -100px;
+            pointer-events: none;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #7B61FF 0%, #00D4FF 100%);
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.2;
+            bottom: -80px;
+            left: -100px;
+            pointer-events: none;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00D4FF, #7B61FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+
+        .header .subtitle {
+            font-size: 11px;
+            color: #A0AEC0;
+            margin-top: 4px;
+        }
+
+        .header .tags {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 2px 10px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            font-size: 9px;
+            color: #00D4FF;
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+            min-height: 0;
+        }
+
+        .panel {
+            background: rgba(26, 31, 53, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: #00D4FF;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .panel-title::before {
+            content: '';
+            width: 2px;
+            height: 12px;
+            background: linear-gradient(180deg, #00D4FF, #7B61FF);
+            border-radius: 1px;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .architecture {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .arch-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            height: 100%;
+        }
+
+        .arch-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 8px;
+            background: rgba(10, 14, 23, 0.6);
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .arch-num {
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #00D4FF, #4A7CFF);
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .arch-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .arch-name {
+            font-size: 10px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .arch-desc {
+            font-size: 8px;
+            color: #A0AEC0;
+        }
+
+        .core-highlights {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .highlight-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .highlight-item {
+            display: flex;
+            gap: 6px;
+            padding: 5px;
+            background: rgba(10, 14, 23, 0.4);
+            border-radius: 5px;
+            font-size: 9px;
+        }
+
+        .h-icon {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(123, 97, 255, 0.2));
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            flex-shrink: 0;
+        }
+
+        .h-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .h-title {
+            color: #fff;
+            font-weight: 500;
+            font-size: 9px;
+            margin-bottom: 2px;
+        }
+
+        .h-desc {
+            color: #A0AEC0;
+            font-size: 8px;
+            line-height: 1.3;
+        }
+
+        .tech-features {
+            grid-column: 3;
+            grid-row: 1;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 4px 0;
+            font-size: 8px;
+        }
+
+        .f-dot {
+            width: 5px;
+            height: 5px;
+            background: linear-gradient(135deg, #00D4FF, #7B61FF);
+            border-radius: 50%;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        .f-text {
+            flex: 1;
+            color: #A0AEC0;
+            line-height: 1.3;
+        }
+
+        .f-text strong {
+            color: #fff;
+        }
+
+        .flow-section {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .flow-list {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            height: 100%;
+        }
+
+        .flow-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 6px;
+            background: rgba(10, 14, 23, 0.4);
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .flow-num {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #00D4FF, #7B61FF);
+            border-radius: 50%;
+            font-size: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .flow-info {
+            flex: 1;
+        }
+
+        .flow-name {
+            font-size: 9px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .flow-desc {
+            font-size: 7px;
+            color: #A0AEC0;
+        }
+
+        .flow-arrow {
+            color: #00D4FF;
+            font-size: 10px;
+        }
+
+        .data-flow {
+            grid-column: 2 / 4;
+            grid-row: 2;
+        }
+
+        .data-flow-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            gap: 6px;
+        }
+
+        .df-section {
+            background: rgba(10, 14, 23, 0.4);
+            border-radius: 6px;
+            padding: 8px;
+            flex: 1;
+        }
+
+        .df-title {
+            font-size: 10px;
+            color: #00D4FF;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .df-steps {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .df-step {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 8px;
+            color: #fff;
+        }
+
+        .df-arrow {
+            color: #00D4FF;
+            font-size: 10px;
+        }
+
+        .output-box {
+            background: rgba(10, 14, 23, 0.6);
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 6px;
+        }
+
+        .output-title {
+            font-size: 9px;
+            color: #7B61FF;
+            margin-bottom: 4px;
+        }
+
+        .output-content {
+            font-size: 8px;
+            color: #A0AEC0;
+            line-height: 1.4;
+        }
+
+        .footer {
+            text-align: center;
+            padding-top: 10px;
+            color: #6B7B8C;
+            font-size: 9px;
+            position: relative;
+            z-index: 1;
+            flex-shrink: 0;
+        }
+
+        .styles-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+            justify-content: center;
+        }
+
+        .style-card {
+            background: rgba(10, 14, 23, 0.6);
+            border-radius: 6px;
+            padding: 6px 12px;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .style-card.brief { border-top: 2px solid #00D4FF; }
+        .style-card.normal { border-top: 2px solid #4A7CFF; }
+        .style-card.professional { border-top: 2px solid #7B61FF; }
+
+        .style-name {
+            font-size: 9px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .style-limit {
+            font-size: 12px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00D4FF, #7B61FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .style-desc {
+            font-size: 7px;
+            color: #A0AEC0;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <div class="header">
+            <h1>PaddleOCR-VL 服务整体架构</h1>
+            <p class="subtitle">AI 数字人 PPT 视频生成系统 · 文档解析与口播文案生成核心组件</p>
+            <div class="tags">
+                <span class="tag">PaddleOCR-VL</span>
+                <span class="tag">FastAPI</span>
+                <span class="tag">DeepSeek</span>
+                <span class="tag">LangChain</span>
+                <span class="tag">CUDA</span>
+                <span class="tag">JSON Schema</span>
+                <span class="tag">Rate Limiter</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel core-highlights">
+                <div class="panel-title">核心亮点</div>
+                <div class="panel-content">
+                    <div class="highlight-list">
+                        <div class="highlight-item">
+                            <div class="h-icon">👁️</div>
+                            <div class="h-content">
+                                <div class="h-title">多模态视觉理解</div>
+                                <div class="h-desc">PaddleOCR-VL 0.9B · 融合图像与文本联合建模，支持复杂版面分析，识别表格、公式、印章等多样化元素</div>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="h-icon">📐</div>
+                            <div class="h-content">
+                                <div class="h-title">一比一布局还原</div>
+                                <div class="h-desc">PP-DocLayoutV2 · 精确还原文档原始布局结构，输出标准 Markdown 格式，保留标题层级、段落顺序、列表缩进</div>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="h-icon">🧠</div>
+                            <div class="h-content">
+                                <div class="h-title">上下文语义理解</div>
+                                <div class="h-desc">DeepSeek · 结合页面背景知识进行语义聚合，生成连贯有逻辑的口播文案，支持跨页面上下文理解</div>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="h-icon">⛓️</div>
+                            <div class="h-content">
+                                <div class="h-title">LangChain Prompt 工程</div>
+                                <div class="h-desc">提示词链式调用，结构化信息抽取 + 文案生成，内置速率限制器防止 API 调用过载</div>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="h-icon">📊</div>
+                            <div class="h-content">
+                                <div class="h-title">JSON 结构化输出</div>
+                                <div class="h-desc">JSON Schema + Pydantic · 标准化 JSON 格式输出，包含 page_num、title、content 等标准字段</div>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="h-icon">⚡</div>
+                            <div class="h-content">
+                                <div class="h-title">GPU 加速与预加载</div>
+                                <div class="h-desc">CUDA 优化 · 推理速度提升 50-60%，模型预加载消除冷启动延迟，支持多 GPU 配置</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel architecture">
+                <div class="panel-title">系统架构</div>
+                <div class="panel-content">
+                    <div class="arch-list">
+                        <div class="arch-item">
+                            <div class="arch-num">1</div>
+                            <div class="arch-info">
+                                <div class="arch-name">客户端层</div>
+                                <div class="arch-desc">digital_human_interface · API 调用</div>
+                            </div>
+                        </div>
+                        <div class="arch-item">
+                            <div class="arch-num">2</div>
+                            <div class="arch-info">
+                                <div class="arch-name">API 服务层</div>
+                                <div class="arch-desc">FastAPI — /parse · /health</div>
+                            </div>
+                        </div>
+                        <div class="arch-item">
+                            <div class="arch-num">3</div>
+                            <div class="arch-info">
+                                <div class="arch-name">业务处理层</div>
+                                <div class="arch-desc">process_file() · get_ppt_voice_content()</div>
+                            </div>
+                        </div>
+                        <div class="arch-item">
+                            <div class="arch-num">4</div>
+                            <div class="arch-info">
+                                <div class="arch-name">模型层</div>
+                                <div class="arch-desc">PaddleOCR-VL · DeepSeek · LangChain</div>
+                            </div>
+                        </div>
+                        <div class="arch-item">
+                            <div class="arch-num">5</div>
+                            <div class="arch-info">
+                                <div class="arch-name">输出层</div>
+                                <div class="arch-desc">Markdown + 口播文案 + JSON 结构化数据</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel tech-features">
+                <div class="panel-title">技术特性</div>
+                <div class="panel-content">
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <div class="f-dot"></div>
+                            <div class="f-text"><strong>多模态 OCR</strong> — 表格、公式、印章等多样化元素识别</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="f-dot"></div>
+                            <div class="f-text"><strong>布局还原</strong> — 标题层级、段落顺序、列表缩进完整保留</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="f-dot"></div>
+                            <div class="f-text"><strong>语义理解</strong> — 结合上下文背景知识进行语义聚合</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="f-dot"></div>
+                            <div class="f-text"><strong>Prompt 链</strong> — 结构化信息抽取 (Structure) 一体化处理</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="f-dot"></div>
+                            <div class="f-text"><strong>JSON 输出</strong> — page_num、title、content 等标准字段</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="f-dot"></div>
+                            <div class="f-text"><strong>风格控制</strong> — brief/normal/professional 三种文案风格</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="f-dot"></div>
+                            <div class="f-text"><strong>GPU 加速</strong> — CUDA 加速推理，速度提升 50-60%</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="f-dot"></div>
+                            <div class="f-text"><strong>模型预加载</strong> — 消除冷启动延迟，首请求快速响应</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="f-dot"></div>
+                            <div class="f-text"><strong>速率限制</strong> — 防止 API 调用过载，保证系统稳定性</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="f-dot"></div>
+                            <div class="f-text"><strong>JSON Schema</strong> — 使用 Pydantic 模型定义输出结构</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel flow-section">
+                <div class="panel-title">处理流程</div>
+                <div class="panel-content">
+                    <div class="flow-list">
+                        <div class="flow-item">
+                            <div class="flow-num">1</div>
+                            <div class="flow-info">
+                                <div class="flow-name">PDF/图片上传</div>
+                                <div class="flow-desc">文档页面上传</div>
+                            </div>
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-num">2</div>
+                            <div class="flow-info">
+                                <div class="flow-name">多模态识别</div>
+                                <div class="flow-desc">PaddleOCR-VL 0.9B</div>
+                            </div>
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-num">3</div>
+                            <div class="flow-info">
+                                <div class="flow-name">布局还原</div>
+                                <div class="flow-desc">PP-DocLayoutV2 + Markdown</div>
+                            </div>
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-num">4</div>
+                            <div class="flow-info">
+                                <div class="flow-name">Prompt 工程</div>
+                                <div class="flow-desc">LangChain 链式 + Rate Limiter</div>
+                            </div>
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-num">5</div>
+                            <div class="flow-info">
+                                <div class="flow-name">文案生成</div>
+                                <div class="flow-desc">DeepSeek 语义理解</div>
+                            </div>
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-num">6</div>
+                            <div class="flow-info">
+                                <div class="flow-name">JSON 输出</div>
+                                <div class="flow-desc">Pydantic 模型 + 结构化文案</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel data-flow">
+                <div class="panel-title">数据业务流程</div>
+                <div class="panel-content">
+                    <div class="data-flow-content">
+                        <div class="df-section">
+                            <div class="df-title">API 接收请求 (FastAPI)</div>
+                            <div class="df-steps">
+                                <span class="df-step">文件 (PDF 或图片)</span>
+                                <span class="df-arrow">→</span>
+                                <span class="df-step">style 参数 (brief/normal/professional)</span>
+                                <span class="df-arrow">→</span>
+                                <span class="df-step">文件验证与保存</span>
+                            </div>
+                        </div>
+                        <div class="df-section">
+                            <div class="df-title">PaddleOCR-VL 识别</div>
+                            <div class="df-steps">
+                                <span class="df-step">加载模型</span>
+                                <span class="df-arrow">→</span>
+                                <span class="df-step">OCR 识别</span>
+                                <span class="df-arrow">→</span>
+                                <span class="df-step">版面分析</span>
+                                <span class="df-arrow">→</span>
+                                <span class="df-step">文本提取</span>
+                                <span class="df-arrow">→</span>
+                                <span class="df-step">Markdown 生成</span>
+                            </div>
+                        </div>
+                        <div class="df-section">
+                            <div class="df-title">口播文案生成 (get_ppt_voice_content)</div>
+                            <div class="df-steps">
+                                <span class="df-step">选择 STYLE_PRESETS</span>
+                                <span class="df-arrow">→</span>
+                                <span class="df-step">构建 Prompt 模板</span>
+                                <span class="df-arrow">→</span>
+                                <span class="df-step">调用 LangChain + DeepSeek</span>
+                                <span class="df-arrow">→</span>
+                                <span class="df-step">生成口播文案</span>
+                            </div>
+                        </div>
+                        <div class="output-box">
+                            <div class="output-title">输出格式</div>
+                            <div class="output-content">
+                                { "success": true, "page_content": "# Markdown 格式的页面内容", "voice_content": "生成的口播文案" }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="styles-bar">
+                <div class="style-card brief">
+                    <div class="style-name">精简</div>
+                    <div class="style-limit">≤100字</div>
+                    <div class="style-desc">简洁明了，重点突出</div>
+                </div>
+                <div class="style-card normal">
+                    <div class="style-name">标准</div>
+                    <div class="style-limit">≤200字</div>
+                    <div class="style-desc">内容完整，表达清晰</div>
+                </div>
+                <div class="style-card professional">
+                    <div class="style-name">专业</div>
+                    <div class="style-limit">≤300字</div>
+                    <div class="style-desc">内容详尽，分析深入</div>
+                </div>
+            </div>
+            <p style="margin-top: 8px;">PaddleOCR-VL 模块 · 多模态识别 · 结构化输出 · LangChain Prompt 工程</p>
+        </div>
+    </div>
+</body>
+</html>
